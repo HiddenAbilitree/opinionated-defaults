@@ -1,3 +1,3 @@
-export { default as prettierNextConfig } from './next';
-export { default as prettierBaseConfig } from './base';
-export { default as prettierAstroConfig } from './astro';
+export { default as prettierConfigNext } from './next';
+export { default as prettierConfigBase } from './base';
+export { default as prettierConfigAstro } from './astro';

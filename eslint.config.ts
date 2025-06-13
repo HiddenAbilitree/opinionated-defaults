@@ -1,13 +1,13 @@
 import {
-  eslintBaseConfig,
-  eslintPrettierConfig,
-  eslintTypescriptConfig,
+  eslintConfigBase,
+  eslintConfigPrettier,
+  eslintConfigTypescript,
 } from 'reasonable-defaults/eslint';
 
 const config = [
-  ...eslintBaseConfig,
-  ...eslintPrettierConfig,
-  ...eslintTypescriptConfig,
+  ...eslintConfigBase,
+  ...eslintConfigPrettier,
+  ...eslintConfigTypescript,
 ];
 
 export default config;
