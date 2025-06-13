@@ -1,40 +1,27 @@
 {
   "name": "reasonable-defaults",
   "description": "Reasonable default configurations for dev tools.",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "license": "MIT",
-  "homepage": "https://github.com/HiddenAbilitree/reasonable-defaults#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/HiddenAbilitree/reasonable-defaults.git"
   },
-  "main": "src/index.ts",
-  "typings": "src/index.ts",
-  "files": [
-    "src"
-  ],
   "type": "module",
-  "exports": {
-    ".": "./src/index.ts",
-    "./prettier": "./src/prettier/index.ts",
-    "./pretter/base": "./src/prettier/base.ts",
-    "./prettier/astro": "./src/prettier/astro.ts",
-    "./prettier/next": "./src/prettier/next.ts",
-    "./eslint": "./src/eslint/index.ts",
-    "./eslint/astro": "./src/eslint/astro.ts",
-    "./eslint/base": "./src/eslint/base.ts",
-    "./eslint/elysia": "./src/eslint/elysia.ts",
-    "./eslint/next": "./src/eslint/next.ts",
-    "./eslint/functional": "./src/eslint/functional.ts",
-    "./eslint/prettier": "./src/eslint/prettier.ts",
-    "./eslint/react": "./src/eslint/react.ts",
-    "./eslint/stylistic": "./src/eslint/stylistic.ts",
-    "./eslint/turbo": "./src/eslint/turbo.ts",
-    "./eslint/typescript": "./src/eslint/typescript.ts"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "unbuild",
+    "prepack": "unbuild"
   },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs"
+    }
+  },
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@eslint/js": "^9.28.0",
     "@next/eslint-plugin-next": "^15.4.0-canary.81",
@@ -59,5 +46,8 @@
     "prettier-plugin-tailwindcss": "0.6.11",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.34.0"
+  },
+  "dependencies": {
+    "unbuild": "^3.5.0"
   }
 }

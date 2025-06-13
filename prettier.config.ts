@@ -1,5 +1,6 @@
+import { type Config } from 'prettier';
 import { prettierBaseConfig } from './src/index.ts';
 
-const config = { ...prettierBaseConfig };
+const config: Config = { ...prettierBaseConfig };
 
 export default config;

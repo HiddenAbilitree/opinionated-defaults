@@ -1,6 +1,6 @@
-import baseConfig from './base.ts';
-import tsConfig from './typescript.ts';
-import functionalConfig from './functional.ts';
+import baseConfig from './base';
+import tsConfig from './typescript';
+import functionalConfig from './functional';
 
 const elysiaConfig = [...baseConfig, ...tsConfig, ...functionalConfig];
 

@@ -1,2 +1,2 @@
-export * from './eslint/index.ts';
-export * from './prettier/index.ts';
+export * from './eslint/index';
+export * from './prettier/index';
