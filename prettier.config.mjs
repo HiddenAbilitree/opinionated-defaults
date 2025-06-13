@@ -1,4 +1,4 @@
-import { prettierConfigBase } from 'reasonable-defaults/prettier';
+import { prettierConfigBase } from '@hiddenability/opinionated-defaults/prettier';
 
 const config = { ...prettierConfigBase };
 

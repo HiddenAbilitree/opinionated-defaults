@@ -2,7 +2,7 @@ import {
   eslintConfigBase,
   eslintConfigPrettier,
   eslintConfigTypescript,
-} from 'reasonable-defaults/eslint';
+} from '@hiddenaility/opinionated-defaults/eslint';
 
 const config = [
   ...eslintConfigBase,
