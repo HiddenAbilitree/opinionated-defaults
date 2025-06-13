@@ -1,41 +1,36 @@
 {
   "name": "reasonable-defaults",
-  "version": "1.0.2",
   "description": "Reasonable default configurations for dev tools.",
+  "version": "1.0.2",
+  "license": "MIT",
   "homepage": "https://github.com/HiddenAbilitree/reasonable-defaults#readme",
-  "bugs": {
-    "url": "https://github.com/HiddenAbilitree/reasonable-defaults/issues"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/HiddenAbilitree/reasonable-defaults.git"
-  },
-  "license": "MIT",
-  "author": "",
-  "type": "module",
-  "exports": {
-    ".": "src/index.ts",
-    "./prettier": "src/prettier/index.ts",
-    "./pretter/base": "src/prettier/base.ts",
-    "./prettier/astro": "src/prettier/astro.ts",
-    "./prettier/next": "src/prettier/next.ts",
-    "./eslint": "src/eslint/index.ts",
-    "./eslint/astro": "src/eslint/astro.ts",
-    "./eslint/base": "src/eslint/base.ts",
-    "./eslint/elysia": "src/eslint/elysia.ts",
-    "./eslint/next": "src/eslint/next.ts",
-    "./eslint/functional": "src/eslint/functional.ts",
-    "./eslint/prettier": "src/eslint/prettier.ts",
-    "./eslint/react": "src/eslint/react.ts",
-    "./eslint/stylistic": "src/eslint/stylistic.ts",
-    "./eslint/turbo": "src/eslint/turbo.ts",
-    "./eslint/typescript": "src/eslint/typescript.ts"
   },
   "main": "src/index.ts",
   "typings": "src/index.ts",
   "files": [
     "src"
   ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./prettier": "./src/prettier/index.ts",
+    "./pretter/base": "./src/prettier/base.ts",
+    "./prettier/astro": "./src/prettier/astro.ts",
+    "./prettier/next": "./src/prettier/next.ts",
+    "./eslint": "./src/eslint/index.ts",
+    "./eslint/astro": "./src/eslint/astro.ts",
+    "./eslint/base": "./src/eslint/base.ts",
+    "./eslint/elysia": "./src/eslint/elysia.ts",
+    "./eslint/next": "./src/eslint/next.ts",
+    "./eslint/functional": "./src/eslint/functional.ts",
+    "./eslint/prettier": "./src/eslint/prettier.ts",
+    "./eslint/react": "./src/eslint/react.ts",
+    "./eslint/stylistic": "./src/eslint/stylistic.ts",
+    "./eslint/turbo": "./src/eslint/turbo.ts",
+    "./eslint/typescript": "./src/eslint/typescript.ts"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
