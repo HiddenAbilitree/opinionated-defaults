@@ -13,6 +13,7 @@
   "files": [
     "src"
   ],
+  "type": "module",
   "exports": {
     ".": "./src/index.ts",
     "./prettier": "./src/prettier/index.ts",
