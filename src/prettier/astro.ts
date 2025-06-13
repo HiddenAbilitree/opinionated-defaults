@@ -1,6 +1,8 @@
-import baseConfig from './base.ts';
+import { type Config } from 'prettier';
 
-const astroConfig = {
+import baseConfig from './base';
+
+const astroConfig: Config = {
   ...baseConfig,
   plugins: ['prettier-plugin-astro', 'prettier-plugin-tailwindcss'],
   tailwindStylesheet: './src/styles/global.css',

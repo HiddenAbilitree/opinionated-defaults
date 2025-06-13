@@ -1,7 +1,7 @@
 import pluginNext from '@next/eslint-plugin-next';
-import baseConfig from './base.ts';
-import tsConfig from './typescript.ts';
-import reactConfig from './react.ts';
+import baseConfig from './base';
+import tsConfig from './typescript';
+import reactConfig from './react';
 
 const nextJsConfig = [
   ...baseConfig,
