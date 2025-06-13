@@ -1,13 +1,10 @@
-import baseConfig from "./base.js";
+import baseConfig from './base.ts';
 
-/**
- * @type {import("prettier").Config}
- */
 const astroConfig = {
   ...baseConfig,
-  plugins: ["prettier-plugin-astro", "prettier-plugin-tailwindcss"],
+  plugins: ['prettier-plugin-astro', 'prettier-plugin-tailwindcss'],
   tailwindStylesheet: './src/styles/global.css',
-  tailwindFunctions: ["cva", 'clsx', 'cn'],
+  tailwindFunctions: ['cva', 'clsx', 'cn'],
   overrides: [
     {
       files: '*.astro',

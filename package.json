@@ -1,32 +1,16 @@
 {
   "name": "@hiddenabilitree/reasonable-defaults",
   "version": "1.0.0",
-  "description": "Reasonable default configurations for dev tools.",
-  "type": "module",
-  "exports": {
-    "./prettier": "./prettier/base.js",
-    "./prettier/astro": "./prettier/astro.js",
-    "./prettier/next": "./prettier/next.js",
-    "./eslint/astro": "./eslint/astro.js",
-    "./eslint/base": "./eslint/base.js",
-    "./eslint/next": "./eslint/next.js",
-    "./eslint/elysia": "./eslint/elysia.js"
-  },
-  "license": "MIT",
-  "peerDependencies": {
-    "prettier": ">=3.0.0",
-    "prettier-plugin-astro": "^0.14.1",
-    "prettier-plugin-tailwindcss": "0.6.11"
-  },
+  "main": "src/index.ts",
   "devDependencies": {
-    "prettier": "3.5.3",
     "@eslint/js": "^9.28.0",
-    "@next/eslint-plugin-next": "^15.3.3",
+    "@next/eslint-plugin-next": "^15.4.0-canary.81",
     "@stylistic/eslint-plugin": "^4.4.1",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-astro": "^1.3.1",
     "eslint-plugin-functional": "^9.0.2",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-no-relative-import-paths": "^1.6.1",
     "eslint-plugin-only-warn": "^1.1.0",
     "eslint-plugin-prefer-arrow-functions": "^3.6.2",
@@ -36,7 +20,36 @@
     "eslint-plugin-turbo": "^2.5.4",
     "eslint-plugin-unicorn": "^59.0.1",
     "globals": "^16.2.0",
+    "jiti": "^2.4.2",
+    "prettier": "3.5.3",
+    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-tailwindcss": "0.6.11",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.33.1"
-  }
+    "typescript-eslint": "^8.34.0"
+  },
+  "exports": {
+    "./": "src",
+    "./prettier": "src/prettier",
+    "./pretter/base": "src/prettier/base.ts",
+    "./prettier/astro": "src/prettier/astro.ts",
+    "./prettier/next": "src/prettier/next.ts",
+    "./eslint": "src/eslint",
+    "./eslint/astro": "src/eslint/astro.ts",
+    "./eslint/base": "src/eslint/base.ts",
+    "./eslint/elysia": "src/eslint/elysia.ts",
+    "./eslint/next": "src/eslint/next.ts",
+    "./eslint/functional": "src/eslint/functional.ts",
+    "./eslint/prettier": "src/eslint/prettier.ts",
+    "./eslint/react": "src/eslint/react.ts",
+    "./eslint/stylistic": "src/eslint/stylistic.ts",
+    "./eslint/turbo": "src/eslint/turbo.ts",
+    "./eslint/typescript": "src/eslint/typescript.ts"
+  },
+  "description": "Reasonable default configurations for dev tools.",
+  "files": [
+    "src"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "typings": "src/index.ts"
 }

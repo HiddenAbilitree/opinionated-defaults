@@ -1,0 +1,9 @@
+export { default as eslintAstroConfig } from './astro.ts';
+export { default as eslintBaseConfig } from './base.ts';
+export { default as eslintElysiaConfig } from './elysia.ts';
+export { default as eslintFunctionalConfig } from './functional.ts';
+export { default as eslintPrettierConfig } from './prettier.ts';
+export { default as eslintReactConfig } from './react.ts';
+export { default as eslintTurboConfig } from './turbo.ts';
+export { default as eslintTypescriptConfig } from './typescript.ts';
+export { default as eslintNextConfig } from './next.ts';
