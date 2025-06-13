@@ -2,7 +2,7 @@ import {
   eslintBaseConfig,
   eslintPrettierConfig,
   eslintTypescriptConfig,
-} from './dist/index.mjs';
+} from 'reasonable-defaults/eslint';
 
 const config = [
   ...eslintBaseConfig,

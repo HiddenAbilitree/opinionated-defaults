@@ -1,7 +1,8 @@
-import { defineBuildConfig } from "unbuild";
+import { defineBuildConfig } from 'unbuild';
 
 export default defineBuildConfig({
-  entries: [{ builder: "mkdist", input: "./src/", outDir: "./dist" }],
+  entries: [{ builder: 'mkdist', input: './src/', outDir: './dist' }],
   declaration: true,
-  failOnWarn: false,
+  sourcemap: true,
+  failOnWarn: true,
 });
