@@ -1,4 +1,5 @@
 import stylistic from '@stylistic/eslint-plugin';
+
 const stylisticConfig = [
   stylistic.configs.all,
   {

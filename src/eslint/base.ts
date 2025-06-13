@@ -1,8 +1,11 @@
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import js from '@eslint/js';
 import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
-// Import noRelativeImportPaths from "eslint-plugin-no-relative-import-paths";
-//
+
+// eslint-plugin-no-relative-import-paths is not used here because
+// jiti does not support path aliases and this project uses these rules.
+// https://github.com/unjs/jiti/issues/373
+
 const config = [
   js.configs.recommended,
   eslintPluginUnicorn.configs.recommended,
@@ -29,20 +32,11 @@ const config = [
       ],
     },
   },
-  // {
-  //   Plugins: {
-  //     'no-relative-import-paths': noRelativeImportPaths,
-  //   },
-  //   Rules: {
-  //     'no-relative-import-paths/no-relative-import-paths': [
-  //       'error',
-  //       { prefix: '@' },
-  //     ],
-  //   },
-  // },
   {
     files: ['**/*.ts', '**/*.js'],
-    ignores: ['dist/**'],
+  },
+  {
+    ignores: ['dist/'],
   },
 ];
 
