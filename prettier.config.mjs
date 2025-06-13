@@ -1,5 +1,5 @@
-import { prettierBaseConfig } from 'reasonable-defaults/prettier';
+import { prettierConfigBase } from 'reasonable-defaults/prettier';
 
-const config = { ...prettierBaseConfig };
+const config = { ...prettierConfigBase };
 
 export default config;
