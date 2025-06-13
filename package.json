@@ -14,7 +14,7 @@
   "author": "",
   "type": "module",
   "exports": {
-    "./": "src/index.ts",
+    ".": "src/index.ts",
     "./prettier": "src/prettier/index.ts",
     "./pretter/base": "src/prettier/base.ts",
     "./prettier/astro": "src/prettier/astro.ts",
