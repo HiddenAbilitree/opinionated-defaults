@@ -7,7 +7,7 @@ A collection of opinionated tooling configurations.
 - Elysia.js
 - Next.js
 
-#### :electric_plug: Included plugins :
+#### Included plugins:
 - [eslint-plugin-prettier](https://github.com/prettier/eslint-plugin-prettier)
 - [eslint-plugin-no-relative-import-paths](https://github.com/MelvinVermeer/eslint-plugin-no-relative-import-paths)
 - [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react)
@@ -23,6 +23,10 @@ A collection of opinionated tooling configurations.
 - Astro
 - Next.js
 - +Opinionated defaults
+
+#### Included plugins:
+- [prettier-plugin-astro](https://github.com/withastro/prettier-plugin-astro)
+- [prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)
 
 ## Installation:
 ```
@@ -72,6 +76,7 @@ export default prettierConfig;
 - prettierConfigBase (General rules for every project)
 
 ## TODO:
-- Improve repository structure (How to manage configuration options within eslint dir?)
+- Improve repository structure (How to manage configuration options within eslint dir?).
 - Maybe convert into monorepo with one package per tool instead of multiple exports from one package.
-- Prevent importing overlapping configurations (i.e., Next.js ESLint config contains base config)
+- Prevent importing overlapping configurations (i.e., Next.js ESLint config contains base config).
+- Support node module resolution.
