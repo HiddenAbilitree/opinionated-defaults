@@ -24,12 +24,19 @@ A collection of opinionated tooling configurations.
 - Next.js
 - +Opinionated defaults
 
+## Installation:
+```
+bun add @hiddenability/opinionated-defaults -d
+```
+
+```
+npm i @hiddenability/opinionated-defaults -D
+```
+
 ## Usage:
-#### Installation:
-`bun add reasonable-defaults -d`
-`npm i reasonable-defaults -D`
 ### Eslint:
 ```ts
+// eslint.config.ts
 import {eslintConfigConfigName} from "reasonable-defaults/eslint"
 
 const eslintConfig = [...eslintConfigConfigName];
@@ -46,11 +53,12 @@ export default eslintConfig;
 - eslintConfigFunctional (Enforces functional style)
 - eslintConfigPrettier (Runs prettier as ESLint rules)
 - eslintConfigReact (General rules for React)
-- eslintConfigRelative (Forces the use of non-relative import paths using path aliases)
-- eslintConfigStylistic (Code-style through ESLint rules)
+- eslintConfigRelative (Enforces the use of absolute import paths using path aliases)
+- eslintConfigStylistic (Enforces code-style through ESLint rules)
 
 ### Prettier:
 ```ts
+// prettier.config.mjs
 import {prettierConfigConfigName} from "reasonable-defaults/prettier"
 
 const prettierConfig = {...prettierConfigConfigName};
