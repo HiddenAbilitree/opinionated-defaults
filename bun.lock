@@ -5,8 +5,8 @@
       "name": "@hiddenabilitree/reasonable-defaults",
       "devDependencies": {
         "@eslint/js": "^9.29.0",
-        "@hiddenability/opinionated-defaults": "0.0.2",
-        "@next/eslint-plugin-next": "^15.4.0-canary.81",
+        "@hiddenability/opinionated-defaults": "0.0.3",
+        "@next/eslint-plugin-next": "^15.4.0-canary.82",
         "@stylistic/eslint-plugin": "^4.4.1",
         "eslint": "^9.29.0",
         "eslint-config-prettier": "^10.1.5",
@@ -105,7 +105,7 @@
 
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.3.2", "", { "dependencies": { "@eslint/core": "^0.15.0", "levn": "^0.4.1" } }, "sha512-4SaFZCNfJqvk/kenHpI8xvN42DMaoycy4PzKc5otHxRswww1kAt82OlBuwRVLofCACCTZEcla2Ydxv8scMXaTg=="],
 
-    "@hiddenability/opinionated-defaults": ["@hiddenability/opinionated-defaults@0.0.2", "", {}, "sha512-KCzDkJlKme9SXmxYSs0oGzg5qy+pLRTRyxX456ajZgKvbYgGHAZwkUvmZgybmfpStSOOAco9xi/uZQvgPln08g=="],
+    "@hiddenability/opinionated-defaults": ["@hiddenability/opinionated-defaults@0.0.3", "", {}, "sha512-rHBULxsAsTjE4LWVaApLF8WYKIMr2gkBW5FMeU/3VsBChrdfFxA7hGCbKwDFCfOP2/55a+SijAR1omU2qyZ19A=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 
@@ -117,7 +117,7 @@
 
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.0", "", {}, "sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ=="],
 
-    "@next/eslint-plugin-next": ["@next/eslint-plugin-next@15.4.0-canary.81", "", { "dependencies": { "fast-glob": "3.3.1" } }, "sha512-+FcjGFZmWRe2JlkWT3vRgafR4aJ1RsTD68Ri/z/oqnGrF65oaXeOdvfXzdV8i0ml9rqknVKDmPL8w0vx+4xZaQ=="],
+    "@next/eslint-plugin-next": ["@next/eslint-plugin-next@15.4.0-canary.82", "", { "dependencies": { "fast-glob": "3.3.1" } }, "sha512-Qoc8AW0V00XbYoPRffdd/8FShWhaQfajMyjU6KS1j2sbDFyNhq0huf+xMNya48vvjoLPOSU+SyyLgnfq0yJxow=="],
 
     "@nodelib/fs.scandir": ["@nodelib/fs.scandir@2.1.5", "", { "dependencies": { "@nodelib/fs.stat": "2.0.5", "run-parallel": "^1.1.9" } }, "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="],
 

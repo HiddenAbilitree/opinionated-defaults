@@ -27,8 +27,8 @@
   ],
   "devDependencies": {
     "@eslint/js": "^9.29.0",
-    "@hiddenability/opinionated-defaults": "0.0.2",
-    "@next/eslint-plugin-next": "^15.4.0-canary.81",
+    "@hiddenability/opinionated-defaults": "0.0.3",
+    "@next/eslint-plugin-next": "^15.4.0-canary.82",
     "@stylistic/eslint-plugin": "^4.4.1",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.5",
