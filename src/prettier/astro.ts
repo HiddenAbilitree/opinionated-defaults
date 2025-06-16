@@ -1,5 +1,4 @@
 import baseConfig from './base';
-
 import lodash from 'lodash';
 import { type Config } from 'prettier';
 
