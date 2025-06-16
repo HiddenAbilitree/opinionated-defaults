@@ -4,9 +4,7 @@ import baseConfig from './base';
 
 const astroConfig: Config = {
   ...baseConfig,
-  plugins: ['prettier-plugin-astro', 'prettier-plugin-tailwindcss'],
-  tailwindStylesheet: './src/styles/global.css',
-  tailwindFunctions: ['cva', 'clsx', 'cn'],
+  plugins: ['prettier-plugin-astro'],
   overrides: [
     {
       files: '*.astro',

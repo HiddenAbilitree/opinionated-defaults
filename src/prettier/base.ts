@@ -11,6 +11,9 @@ const config: Config = {
   semi: true,
   experimentalTernaries: true,
   bracketSameLine: false,
+  plugins: ['@trivago/prettier-plugin-sort-imports'],
+  importOrderSeparation: true,
+  importOrderSortSpecifiers: true,
 };
 
 export default config;
