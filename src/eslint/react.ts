@@ -1,5 +1,5 @@
-import pluginReactHooks from 'eslint-plugin-react-hooks';
 import pluginReact from 'eslint-plugin-react';
+import pluginReactHooks from 'eslint-plugin-react-hooks';
 
 const reactConfig = [
   pluginReact.configs.flat['recommended'],

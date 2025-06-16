@@ -1,5 +1,11 @@
-import { prettierConfigBase } from '@hiddenability/opinionated-defaults/prettier';
+import {
+  prettierConfigBase,
+  prettierConfigTailwind,
+} from '@hiddenability/opinionated-defaults/prettier';
+import lodash from 'lodash';
 
-const config = { ...prettierConfigBase };
+const { merge } = lodash;
+
+const config = merge(prettierConfigTailwind, prettierConfigBase);
 
 export default config;

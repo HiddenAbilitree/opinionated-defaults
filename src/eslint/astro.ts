@@ -1,7 +1,7 @@
 import baseConfig from './base';
-import eslintPluginAstro from 'eslint-plugin-astro';
-import tsConfig from './typescript';
 import relativeConfig from './relative';
+import tsConfig from './typescript';
+import eslintPluginAstro from 'eslint-plugin-astro';
 
 const astroConfig = [
   ...baseConfig,

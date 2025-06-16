@@ -7,6 +7,18 @@ A collection of opinionated tooling configurations.
 - Elysia.js
 - Next.js
 
+####  Exports:
+- eslintConfigAstro (Astro)
+- eslintConfigElysia (Elysia.js)
+- eslintConfigNext (Next.js)
+- eslintConfigTurbo (Turborepo)
+- eslintConfigBase (General rules for every project)
+- eslintConfigFunctional (Enforces functional style)
+- eslintConfigPrettier (Runs prettier as ESLint rules)
+- eslintConfigReact (General rules for React)
+- eslintConfigRelative (Enforces the use of absolute import paths using path aliases)
+- eslintConfigStylistic (Enforces code-style through ESLint rules)
+
 #### Included plugins:
 - [eslint-plugin-prettier](https://github.com/prettier/eslint-plugin-prettier)
 - [eslint-plugin-no-relative-import-paths](https://github.com/MelvinVermeer/eslint-plugin-no-relative-import-paths)
@@ -24,11 +36,18 @@ A collection of opinionated tooling configurations.
 - Next.js
 - +Opinionated defaults
 
+#### Exports:
+- prettierConfigAstro (Astro prettier rules with Tailwind class ordering)
+- prettierConfigNext (Rules for Next.js with Tailwind class ordering)
+- prettierConfigBase (General rules for every project)
+- configMerge (used to merge configurations)
+
 #### Included plugins:
 - [prettier-plugin-astro](https://github.com/withastro/prettier-plugin-astro)
 - [prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)
 
 ## Installation:
+
 ```
 bun add @hiddenability/opinionated-defaults -d
 ```
@@ -38,42 +57,47 @@ npm i @hiddenability/opinionated-defaults -D
 ```
 
 ## Usage:
+
 ### Eslint:
+
 ```ts
 // eslint.config.ts
-import {eslintConfigConfigName} from "reasonable-defaults/eslint"
+import { eslintConfigConfigName } from "@hiddenability/opinionated-defaults/eslint";
 
 const eslintConfig = [...eslintConfigConfigName];
 
 export default eslintConfig;
 ```
 
-##### Supported Imports:
-- eslintConfigAstro (Astro)
-- eslintConfigElysia (Elysia.js)
-- eslintConfigNext (Next.js)
-- eslintConfigTurbo (Turborepo)
-- eslintConfigBase (General rules for every project)
-- eslintConfigFunctional (Enforces functional style)
-- eslintConfigPrettier (Runs prettier as ESLint rules)
-- eslintConfigReact (General rules for React)
-- eslintConfigRelative (Enforces the use of absolute import paths using path aliases)
-- eslintConfigStylistic (Enforces code-style through ESLint rules)
-
 ### Prettier:
+
 ```ts
 // prettier.config.mjs
-import {prettierConfigConfigName} from "reasonable-defaults/prettier"
+import { prettierConfigConfigName } from "@hiddenability/opinionated-defaults/prettier";
 
 const prettierConfig = {...prettierConfigConfigName};
 
 export default prettierConfig;
 ```
 
-##### Supported Imports:
-- prettierConfigAstro (Astro prettier rules with Tailwind class ordering)
-- prettierConfigNext (Rules for Next.js with Tailwind class ordering)
-- prettierConfigBase (General rules for every project)
+#### Extending/Combining Prettier Configs:
+Since prettier uses a configuration object instead of a flat config like ESLint, to extend or combine configurations, you need to use the provided merge function.
+
+```ts 
+// prettier.config.mjs
+import { 
+  prettierConfig1,
+  prettierConfig2,
+  merge,
+} from "@hiddenability/opinionated-defaults/prettier";
+
+const prettierConfig = merge(prettierConfig1, prettierConfig2, {/* your custom rules */} /*...*/);
+
+export default prettierConfig;
+```
+
+> [!NOTE]  
+> When using prettierConfigTailwind, it needs to come first in the merge function. Read more [here](https://github.com/tailwindlabs/prettier-plugin-tailwindcss#compatibility-with-other-prettier-plugins)
 
 ## TODO:
 - Improve repository structure (How to manage configuration options within eslint dir?).

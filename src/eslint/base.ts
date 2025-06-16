@@ -1,6 +1,6 @@
-import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import js from '@eslint/js';
 import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
+import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 
 // eslint-plugin-no-relative-import-paths is not used here because
 // jiti does not support path aliases and this project uses these rules.
