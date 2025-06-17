@@ -34,7 +34,14 @@ const config = [
     },
   },
   {
-    files: ['**/*.ts', '**/*.js'],
+    files: [
+      '**/*.ts',
+      '**/*.js',
+      '**/*.mjs',
+      '**/*.mts',
+      '**/*.tsx',
+      '**/*.jsx',
+    ],
   },
   {
     ignores: ['dist/'],
