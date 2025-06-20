@@ -9,9 +9,10 @@
   },
   "type": "module",
   "scripts": {
-    "build": "unbuild",
-    "prepack": "bun run lint && unbuild",
-    "lint": "eslint . --fix"
+    "build": "bun run test run && bun run lint && unbuild",
+    "prepack": "bun run test run && bun run lint && unbuild",
+    "lint": "eslint . --fix",
+    "test": "vitest"
   },
   "exports": {
     "./eslint": {
@@ -52,9 +53,10 @@
     "typescript-eslint": "^8.34.0"
   },
   "devDependencies": {
-    "@hiddenability/opinionated-defaults": "^0.0.11",
+    "@hiddenability/opinionated-defaults": "^0.0.12",
     "jiti": "^2.4.2",
     "typescript": "^5.8.3",
-    "unbuild": "^3.5.0"
+    "unbuild": "^3.5.0",
+    "vitest": "^3.2.4"
   }
 }
