@@ -96,9 +96,6 @@ const prettierConfig = merge(prettierConfig1, prettierConfig2, {/* your custom r
 export default prettierConfig;
 ```
 
-> [!NOTE]  
-> When using prettierConfigTailwind, it needs to come first in the merge function. Read more [here](https://github.com/tailwindlabs/prettier-plugin-tailwindcss#compatibility-with-other-prettier-plugins)
-
 ## TODO:
 - Improve repository structure (How to manage configuration options within eslint dir?).
 - Maybe convert into monorepo with one package per tool instead of multiple exports from one package.
