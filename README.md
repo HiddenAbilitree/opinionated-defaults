@@ -101,3 +101,4 @@ export default prettierConfig;
 - Maybe convert into monorepo with one package per tool instead of multiple exports from one package.
 - Prevent importing overlapping configurations (i.e., Next.js ESLint config contains base config).
 - Support node module resolution.
+- Maybe make declarative configurations instead of just providing wrapped config.
