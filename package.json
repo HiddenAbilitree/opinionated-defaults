@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "@hiddenability/opinionated-defaults": "^0.0.13",
+    "@types/bun": "^1.2.17",
     "jiti": "^2.4.2",
     "typescript": "^5.8.3",
     "unbuild": "^3.5.0",

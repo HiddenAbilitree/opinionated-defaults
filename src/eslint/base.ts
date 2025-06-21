@@ -12,6 +12,8 @@ const config = [
   {
     rules: {
       'unicorn/prevent-abbreviations': ['off'],
+      'unicorn/no-array-for-each': ['off'],
+      'unicorn/no-array-reduce': ['off'],
       'unicorn/filename-case': [
         'error',
         {
