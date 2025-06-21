@@ -1,8 +1,7 @@
 import parser from '@typescript-eslint/parser';
 import tseslint from 'typescript-eslint';
-import { type Config } from 'typescript-eslint';
 
-const typescriptConfig: Config = [
+const typescriptConfig: object[] = [
   ...tseslint.configs.recommended,
   {
     languageOptions: {
