@@ -27,11 +27,9 @@
   "files": [
     "dist"
   ],
-  "peerDependencies": {
-    "eslint": "^9.29.0",
-    "prettier": "3.5.3"
-  },
   "dependencies": {
+    "eslint": "^9.29.0",
+    "prettier": "3.5.3",
     "@eslint/js": "^9.29.0",
     "@next/eslint-plugin-next": "^15.4.0-canary.90",
     "@stylistic/eslint-plugin": "^4.4.1",
