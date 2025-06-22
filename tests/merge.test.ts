@@ -85,9 +85,6 @@ const expected2 = {
 
 test('merge handles normal input correctly', () => {
   expect(merge(obj1, obj2)).toStrictEqual(expected1);
-});
-
-test("merge order doesn't matter", () => {
   expect(merge(obj2, obj1)).toStrictEqual(expected1);
 });
 

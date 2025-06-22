@@ -5,7 +5,7 @@
       "name": "@hiddenabilitree/reasonable-defaults",
       "dependencies": {
         "@eslint/js": "^9.29.0",
-        "@next/eslint-plugin-next": "^15.4.0-canary.89",
+        "@next/eslint-plugin-next": "^15.4.0-canary.90",
         "@stylistic/eslint-plugin": "^4.4.1",
         "@trivago/prettier-plugin-sort-imports": "^5.2.2",
         "@types/lodash": "^4.17.18",
@@ -26,7 +26,7 @@
         "typescript-eslint": "^8.34.1",
       },
       "devDependencies": {
-        "@hiddenability/opinionated-defaults": "^0.0.13",
+        "@hiddenability/opinionated-defaults": "0.0.15",
         "@types/bun": "^1.2.17",
         "jiti": "^2.4.2",
         "typescript": "^5.8.3",
@@ -126,7 +126,7 @@
 
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.3.2", "", { "dependencies": { "@eslint/core": "^0.15.0", "levn": "^0.4.1" } }, "sha512-4SaFZCNfJqvk/kenHpI8xvN42DMaoycy4PzKc5otHxRswww1kAt82OlBuwRVLofCACCTZEcla2Ydxv8scMXaTg=="],
 
-    "@hiddenability/opinionated-defaults": ["@hiddenability/opinionated-defaults@0.0.13", "", { "dependencies": { "@eslint/js": "^9.29.0", "@next/eslint-plugin-next": "^15.4.0-canary.83", "@stylistic/eslint-plugin": "^4.4.1", "@trivago/prettier-plugin-sort-imports": "^5.2.2", "@types/lodash": "^4.17.17", "eslint-config-prettier": "^10.1.5", "eslint-plugin-astro": "^1.3.1", "eslint-plugin-functional": "^9.0.2", "eslint-plugin-no-relative-import-paths": "^1.6.1", "eslint-plugin-prefer-arrow-functions": "^3.6.2", "eslint-plugin-prettier": "^5.4.1", "eslint-plugin-react": "^7.37.5", "eslint-plugin-react-hooks": "^5.2.0", "eslint-plugin-turbo": "^2.5.4", "eslint-plugin-unicorn": "^59.0.1", "lodash": "^4.17.21", "prettier-plugin-astro": "^0.14.1", "prettier-plugin-tailwindcss": "0.6.12", "typescript-eslint": "^8.34.0" }, "peerDependencies": { "eslint": "^9.29.0", "prettier": "3.5.3" } }, "sha512-dvnfvUPSdr7JF/uSwSBxSbWShF4VwFXID71Pvb4Ztc/LS/16xg2TPpEye9LukOt6lBVyp2gPBvghfrsVRSQTPw=="],
+    "@hiddenability/opinionated-defaults": ["@hiddenability/opinionated-defaults@0.0.15", "", { "dependencies": { "@eslint/js": "^9.29.0", "@next/eslint-plugin-next": "^15.4.0-canary.89", "@stylistic/eslint-plugin": "^4.4.1", "@trivago/prettier-plugin-sort-imports": "^5.2.2", "@types/lodash": "^4.17.18", "eslint-config-prettier": "^10.1.5", "eslint-plugin-astro": "^1.3.1", "eslint-plugin-functional": "^9.0.2", "eslint-plugin-no-relative-import-paths": "^1.6.1", "eslint-plugin-prefer-arrow-functions": "^3.6.2", "eslint-plugin-prettier": "^5.5.0", "eslint-plugin-react": "^7.37.5", "eslint-plugin-react-hooks": "^5.2.0", "eslint-plugin-solid": "^0.14.5", "eslint-plugin-turbo": "^2.5.4", "eslint-plugin-unicorn": "^59.0.1", "lodash": "^4.17.21", "prettier-plugin-astro": "^0.14.1", "prettier-plugin-tailwindcss": "0.6.12", "typescript-eslint": "^8.34.1" }, "peerDependencies": { "eslint": "^9.29.0", "prettier": "3.5.3" } }, "sha512-C67hBwlDt4XMUvZbmaV2lftjTJtLr7NWqOpGBVbh7yUmBVSujfHYxL1Ey2Mc6+HUav88NV6ej6kVwoFSIMyAow=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 
@@ -146,7 +146,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
 
-    "@next/eslint-plugin-next": ["@next/eslint-plugin-next@15.4.0-canary.89", "", { "dependencies": { "fast-glob": "3.3.1" } }, "sha512-XeE88+ogeKDT/j9S2OcKLCJnzI4waamqLuD0k8Y9sXMpDfFgMHSCjvIu4M2F71ddSUhb7OoUFiIGKwDaIa2ENQ=="],
+    "@next/eslint-plugin-next": ["@next/eslint-plugin-next@15.4.0-canary.90", "", { "dependencies": { "fast-glob": "3.3.1" } }, "sha512-soUPjd+LNuCN3JxV/OBBQX4VM8M5eVn/IuRuozjPOCAJWQ32ugVB7HwfCHUYrAx+4Mb41lB4/bTPXDSjg0TGPw=="],
 
     "@nodelib/fs.scandir": ["@nodelib/fs.scandir@2.1.5", "", { "dependencies": { "@nodelib/fs.stat": "2.0.5", "run-parallel": "^1.1.9" } }, "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="],
 
