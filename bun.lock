@@ -144,7 +144,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
 
-    "@next/eslint-plugin-next": ["@next/eslint-plugin-next@15.4.0-canary.90", "", { "dependencies": { "fast-glob": "3.3.1" } }, "sha512-soUPjd+LNuCN3JxV/OBBQX4VM8M5eVn/IuRuozjPOCAJWQ32ugVB7HwfCHUYrAx+4Mb41lB4/bTPXDSjg0TGPw=="],
+    "@next/eslint-plugin-next": ["@next/eslint-plugin-next@15.4.0-canary.92", "", { "dependencies": { "fast-glob": "3.3.1" } }, "sha512-nVyf/aQqB0u8WC/jBoUkg1VDNxTPTTYxio5rceAeRg80YeBh7wsMx+2QDo4LL3dAAAQyMhq//6XcP35KsXURWA=="],
 
     "@nodelib/fs.scandir": ["@nodelib/fs.scandir@2.1.5", "", { "dependencies": { "@nodelib/fs.stat": "2.0.5", "run-parallel": "^1.1.9" } }, "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="],
 
@@ -1021,6 +1021,8 @@
     "@eslint/eslintrc/globals": ["globals@14.0.0", "", {}, "sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ=="],
 
     "@eslint/plugin-kit/@eslint/core": ["@eslint/core@0.15.0", "", { "dependencies": { "@types/json-schema": "^7.0.15" } }, "sha512-b7ePw78tEWWkpgZCDYkbqDOP8dmM6qe+AOC6iuJqlq1R/0ahMAeH3qynpnqKFGkMltrp44ohV4ubGyvLX28tzw=="],
+
+    "@hiddenability/opinionated-defaults/@next/eslint-plugin-next": ["@next/eslint-plugin-next@15.4.0-canary.90", "", { "dependencies": { "fast-glob": "3.3.1" } }, "sha512-soUPjd+LNuCN3JxV/OBBQX4VM8M5eVn/IuRuozjPOCAJWQ32ugVB7HwfCHUYrAx+4Mb41lB4/bTPXDSjg0TGPw=="],
 
     "@humanfs/node/@humanwhocodes/retry": ["@humanwhocodes/retry@0.3.1", "", {}, "sha512-JBxkERygn7Bv/GbN5Rv8Ul6LVknS+5Bp6RgDC/O8gEBU/yeH5Ui5C/OlWrTb6qct7LjjfT6Re2NxB0ln0yYybA=="],
 
