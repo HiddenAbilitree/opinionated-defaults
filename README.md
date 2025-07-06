@@ -53,6 +53,7 @@ A collection of opinionated tooling configurations.
 
 - [prettier-plugin-astro](https://github.com/withastro/prettier-plugin-astro)
 - [prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)
+- [prettier-plugin-sort-imports](https://github.com/trivago/prettier-plugin-sort-imports)
 
 ## Installation:
 
@@ -105,7 +106,8 @@ const prettierConfig = merge(
   prettierConfig2,
   {
     /* your custom rules */
-  } /*...*/,
+  },
+ /*...*/
 );
 
 export default prettierConfig;
