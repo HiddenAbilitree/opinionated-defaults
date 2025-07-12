@@ -1,18 +1,19 @@
-import baseConfig from './base';
 import lodash from 'lodash';
 import { type Config } from 'prettier';
+
+import baseConfig from './base';
 
 const { merge } = lodash;
 
 const astroConfig: Config = merge(
   {
-    plugins: ['prettier-plugin-astro'],
     overrides: [
       {
         files: '*.astro',
         options: { parser: 'astro' },
       },
     ],
+    plugins: ['prettier-plugin-astro'],
   },
   baseConfig,
 );

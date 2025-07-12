@@ -1,5 +1,6 @@
-import lodash from 'lodash';
 import type { Config } from 'prettier';
+
+import lodash from 'lodash';
 
 const { isArray, mergeWith, union } = lodash;
 

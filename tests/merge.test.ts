@@ -1,21 +1,23 @@
-import { merge } from '../src/prettier/index';
 import type { Config } from 'prettier';
+
 import { expect, test } from 'vitest';
 
+import { merge } from '../src/prettier/index';
+
 const obj1: Config = {
-  trailingComma: 'all',
-  singleQuote: true,
-  jsxSingleQuote: true,
-  tabWidth: 2,
   arrowParens: 'always',
-  bracketSpacing: true,
-  useTabs: false,
-  semi: true,
-  experimentalTernaries: true,
   bracketSameLine: false,
-  plugins: ['@trivago/prettier-plugin-sort-imports'],
+  bracketSpacing: true,
+  experimentalTernaries: true,
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,
+  jsxSingleQuote: true,
+  plugins: ['@trivago/prettier-plugin-sort-imports'],
+  semi: true,
+  singleQuote: true,
+  tabWidth: 2,
+  trailingComma: 'all',
+  useTabs: false,
 };
 
 const obj2: Config = {
@@ -25,13 +27,13 @@ const obj2: Config = {
 
 const obj3: Config = merge(
   {
-    plugins: ['prettier-plugin-astro'],
     overrides: [
       {
         files: '*.astro',
         options: { parser: 'astro' },
       },
     ],
+    plugins: ['prettier-plugin-astro'],
   },
   obj1,
 );
@@ -64,6 +66,12 @@ const expected2 = {
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,
   jsxSingleQuote: true,
+  overrides: [
+    {
+      files: '*.astro',
+      options: { parser: 'astro' },
+    },
+  ],
   plugins: [
     '@trivago/prettier-plugin-sort-imports',
     'prettier-plugin-astro',
@@ -75,12 +83,6 @@ const expected2 = {
   tailwindFunctions: ['cva', 'clsx', 'cn'],
   trailingComma: 'all',
   useTabs: false,
-  overrides: [
-    {
-      files: '*.astro',
-      options: { parser: 'astro' },
-    },
-  ],
 };
 
 test('merge handles normal input correctly', () => {

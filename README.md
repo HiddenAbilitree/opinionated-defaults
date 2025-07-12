@@ -13,18 +13,19 @@ A collection of opinionated tooling configurations.
 #### Exports:
 
 - eslintConfigAstro (Astro)
-- eslintConfigElysia (Elysia.js)
-- eslintConfigNext (Next.js)
-- eslintConfigTurbo (Turborepo)
 - eslintConfigBase (General rules for every project)
+- eslintConfigElysia (Elysia.js)
 - eslintConfigFunctional (Enforces functional style)
-- eslintConfigPrettier (Runs prettier as ESLint rules)
+- eslintConfigNext (Next.js)
+- eslintConfigPrettier (Runs Prettier as ESLint rules)
 - eslintConfigReact (General rules for React)
 - eslintConfigRelative (Enforces the use of absolute import paths using path aliases)
 - eslintConfigStylistic (Enforces code-style through ESLint rules)
+- eslintConfigTurbo (Turborepo)
 
 #### Included plugins:
 
+- [eslint-plugin-astro](https://github.com/ota-meshi/eslint-plugin-astro)
 - [eslint-plugin-prettier](https://github.com/prettier/eslint-plugin-prettier)
 - [eslint-plugin-no-relative-import-paths](https://github.com/MelvinVermeer/eslint-plugin-no-relative-import-paths)
 - [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react)
@@ -32,8 +33,8 @@ A collection of opinionated tooling configurations.
 - [eslint-plugin-turbo](https://github.com/vercel/turborepo/tree/main/packages/eslint-plugin-turbo)
 - [eslint-plugin-unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn)
 - [eslint-plugin-functional](https://github.com/eslint-functional/eslint-plugin-functional)
-- [eslint-plugin-astro](https://github.com/ota-meshi/eslint-plugin-astro)
 - [eslint-plugin-next](https://github.com/vercel/next.js/tree/canary/packages/eslint-plugin-next)
+- [eslint-plugin-perfectionist](https://github.com/azat-io/eslint-plugin-perfectionist)
 - [eslint-stylistic](https://github.com/eslint-stylistic/eslint-stylistic)
 
 ### Prettier:
@@ -47,6 +48,7 @@ A collection of opinionated tooling configurations.
 - prettierConfigAstro (Astro prettier rules with Tailwind class ordering)
 - prettierConfigNext (Rules for Next.js with Tailwind class ordering)
 - prettierConfigBase (General rules for every project)
+- prettierConfigSortImports (Prettier-based import sorting)
 - configMerge (used to merge configurations)
 
 #### Included plugins:

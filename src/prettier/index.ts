@@ -1,4 +1,5 @@
-export { default as prettierConfigBase } from './base';
 export { default as prettierConfigAstro } from './astro';
-export { default as prettierConfigTailwind } from './tailwind';
+export { default as prettierConfigBase } from './base';
 export { merge } from './merge';
+export { default as prettierConfigSortImports } from './sort-imports';
+export { default as prettierConfigTailwind } from './tailwind';

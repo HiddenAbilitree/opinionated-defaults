@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import perfectionist from 'eslint-plugin-perfectionist';
 import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 
@@ -9,11 +10,9 @@ import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 const config = [
   js.configs.recommended,
   eslintPluginUnicorn.configs.recommended,
+  perfectionist.configs['recommended-natural'],
   {
     rules: {
-      'unicorn/prevent-abbreviations': ['off'],
-      'unicorn/no-array-for-each': ['off'],
-      'unicorn/no-array-reduce': ['off'],
       'unicorn/filename-case': [
         'error',
         {
@@ -22,6 +21,9 @@ const config = [
           },
         },
       ],
+      'unicorn/no-array-for-each': ['off'],
+      'unicorn/no-array-reduce': ['off'],
+      'unicorn/prevent-abbreviations': ['off'],
     },
   },
   {
