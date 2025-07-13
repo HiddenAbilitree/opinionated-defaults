@@ -3,6 +3,7 @@ export { default as eslintConfigBase } from './base';
 export { default as eslintConfigElysia } from './elysia';
 export { default as eslintConfigFunctional } from './functional';
 export { default as eslintConfigNext } from './next';
+export { default as eslintConfigPefectionist } from './perfectionist';
 export { default as eslintConfigPrettier } from './prettier';
 export { default as eslintConfigReact } from './react';
 export { default as eslintConfigRelative } from './relative';

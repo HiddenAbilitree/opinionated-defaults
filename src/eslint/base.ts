@@ -1,5 +1,4 @@
 import js from '@eslint/js';
-import perfectionist from 'eslint-plugin-perfectionist';
 import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 
@@ -10,7 +9,6 @@ import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 const config = [
   js.configs.recommended,
   eslintPluginUnicorn.configs.recommended,
-  perfectionist.configs['recommended-natural'],
   {
     rules: {
       'unicorn/filename-case': [

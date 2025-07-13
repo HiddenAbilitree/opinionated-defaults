@@ -1,7 +1,7 @@
 {
   "name": "@hiddenability/opinionated-defaults",
-  "description": "Opinionated default configurations for dev tools.",
-  "version": "0.0.23",
+  "description": "Opinionated default configurations for webdev tools.",
+  "version": "0.0.24",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -9,9 +9,10 @@
   },
   "type": "module",
   "scripts": {
-    "build": "bun run test run && bun run lint && unbuild",
-    "prepack": "bun run test run && bun run lint && unbuild",
-    "lint": "eslint . --fix",
+    "build": "bun run test run && unbuild",
+    "prepack": "bun run test run && unbuild",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "vitest"
   },
   "exports": {
