@@ -115,6 +115,29 @@ const prettierConfig = merge(
 export default prettierConfig;
 ```
 
+#### TailwindCSS Plugin:
+
+When using `prettier-config-tailwind`, make sure to specify the CSS file that contains the `@import "tailwindcss"` directive.
+
+For example, given the following css file:
+```css
+// /app/styles.css
+@import 'tailwindcss';
+```
+
+This should be a minimal version of your Prettier config:
+
+```ts
+// prettier.config.mjs
+import { prettierConfigTailwind } from '@hiddenability/opinionated-defaults/prettier';
+
+const prettierConfig = merge(
+  prettierConfigTailwind,
+  { tailwindStylesheet: './app/styles.css' }
+);
+```
+
+
 ## TODO:
 
 - Improve repository structure (How to manage configuration options within eslint dir?).
