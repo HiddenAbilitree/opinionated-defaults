@@ -9,11 +9,11 @@ const astroConfig: Config = merge(
   {
     overrides: [
       {
-        files: '*.astro',
-        options: { parser: 'astro' },
+        files: `*.astro`,
+        options: { parser: `astro` },
       },
     ],
-    plugins: ['prettier-plugin-astro'],
+    plugins: [`prettier-plugin-astro`],
   },
   baseConfig,
 );

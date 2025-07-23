@@ -1,7 +1,7 @@
 import { type Config } from 'prettier';
 
 const config: Config = {
-  arrowParens: 'always',
+  arrowParens: `always`,
   bracketSameLine: false,
   bracketSpacing: true,
   experimentalTernaries: true,
@@ -9,7 +9,7 @@ const config: Config = {
   semi: true,
   singleQuote: true,
   tabWidth: 2,
-  trailingComma: 'all',
+  trailingComma: `all`,
   useTabs: false,
 };
 

@@ -1,13 +1,14 @@
 import {
+  eslintConfig,
   eslintConfigBase,
+  eslintConfigPerfectionist,
   eslintConfigPrettier,
   eslintConfigTypescript,
 } from '@hiddenability/opinionated-defaults/eslint';
 
-const config = [
+export default eslintConfig([
   ...eslintConfigBase,
   ...eslintConfigPrettier,
   ...eslintConfigTypescript,
-];
-
-export default config;
+  ...eslintConfigPerfectionist,
+]);

@@ -12,6 +12,7 @@ A collection of opinionated tooling configurations.
 
 #### Exports:
 
+- eslintConfig (Used to provide autocomplete)
 - eslintConfigAstro (Astro)
 - eslintConfigBase (General rules for every project)
 - eslintConfigElysia (Elysia.js)
@@ -45,11 +46,11 @@ A collection of opinionated tooling configurations.
 
 #### Exports:
 
+- prettierConfig (Used to merge configurations and provide autocomplete)
 - prettierConfigAstro (Astro prettier rules with Tailwind class ordering)
 - prettierConfigNext (Rules for Next.js with Tailwind class ordering)
 - prettierConfigBase (General rules for every project)
 - prettierConfigSortImports (Prettier-based import sorting)
-- configMerge (used to merge configurations)
 
 #### Included plugins:
 
@@ -73,46 +74,50 @@ npm i @hiddenability/opinionated-defaults -D
 
 ```ts
 // eslint.config.ts
-import { eslintConfigConfigName } from '@hiddenability/opinionated-defaults/eslint';
+import {
+  eslintConfig,
+  eslintConfigBase,
+} from '@hiddenability/opinionated-defaults/eslint';
 
-const eslintConfig = [...eslintConfigConfigName];
-
-export default eslintConfig;
+export default eslintConfig([
+  ...eslintConfigBase,
+  // ...eslintConfigPrettier, // other configs fit right in!
+  // { /* your rules here */ },
+]);
 ```
 
 ### Prettier:
 
 ```ts
 // prettier.config.mjs
-import { prettierConfigConfigName } from '@hiddenability/opinionated-defaults/prettier';
+import {
+  prettierConfig,
+  prettierConfigBase,
+} from '@hiddenability/opinionated-defaults/prettier';
 
-const prettierConfig = { ...prettierConfigConfigName };
-
-export default prettierConfig;
+export default prettierConfig(prettierConfigBase);
 ```
 
 #### Extending/Combining Prettier Configs:
 
-Since prettier uses a configuration object instead of a flat config like ESLint, to extend or combine configurations, you need to use the provided merge function.
+Since Prettier uses a configuration object instead of a flat config like ESLint, to extend or combine configurations, the `prettierConfig` function will merge configs for you.
 
 ```ts
 // prettier.config.mjs
 import {
-  merge,
+  prettierConfig,
   prettierConfig1,
   prettierConfig2,
 } from '@hiddenability/opinionated-defaults/prettier';
 
-const prettierConfig = merge(
+export default prettierConfig(
   prettierConfig1,
   prettierConfig2,
   {
     /* your custom rules */
   },
- /*...*/
+  /*...*/
 );
-
-export default prettierConfig;
 ```
 
 #### TailwindCSS Plugin:
@@ -120,6 +125,7 @@ export default prettierConfig;
 When using `prettier-config-tailwind`, make sure to specify the CSS file that contains the `@import "tailwindcss"` directive.
 
 For example, given the following css file:
+
 ```css
 // /app/styles.css
 @import 'tailwindcss';
@@ -129,14 +135,16 @@ This should be a minimal version of your Prettier config:
 
 ```ts
 // prettier.config.mjs
-import { prettierConfigTailwind } from '@hiddenability/opinionated-defaults/prettier';
-
-const prettierConfig = merge(
+import {
+  prettierConfig,
+  prettierConfigBase,
   prettierConfigTailwind,
-  { tailwindStylesheet: './app/styles.css' }
-);
-```
+} from '@hiddenability/opinionated-defaults/prettier';
 
+export default prettierConfig(prettierConfigBase, prettierConfigTailwind, {
+  tailwindStylesheet: `./app/styles.css`,
+});
+```
 
 ## TODO:
 

@@ -1,1 +1,6 @@
-export { prettierConfigBase as default } from '@hiddenability/opinionated-defaults/prettier';
+import {
+  prettierConfig,
+  prettierConfigBase,
+} from '@hiddenability/opinionated-defaults/prettier';
+
+export default prettierConfig(prettierConfigBase);
