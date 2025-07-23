@@ -1,7 +1,10 @@
 import { type BunPlugin } from 'bun';
 import { consola } from 'consola';
 import { colorize } from 'consola/utils';
+import { rm } from 'node:fs/promises';
 import { isolatedDeclaration } from 'oxc-transform';
+
+await rm(`./dist`, { force: true, recursive: true });
 
 performance.mark(`build_start`);
 
