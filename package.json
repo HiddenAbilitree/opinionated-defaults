@@ -60,7 +60,6 @@
     "@hiddenability/opinionated-defaults": "link:@hiddenability/opinionated-defaults",
     "@types/bun": "^1.2.18",
     "consola": "^3.4.2",
-    "oxc-transform": "^0.77.3",
-    "typescript": "^5.8.3"
+    "oxc-transform": "^0.77.3"
   }
 }
