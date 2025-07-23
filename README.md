@@ -127,7 +127,7 @@ When using `prettier-config-tailwind`, make sure to specify the CSS file that co
 For example, given the following css file:
 
 ```css
-// /app/styles.css
+/* /app/styles.css */
 @import 'tailwindcss';
 ```
 

@@ -38,7 +38,7 @@ const obj3: Config = merge(
   obj1,
 );
 
-const expected1 = {
+const expected1: Config = {
   arrowParens: `always`,
   bracketSameLine: false,
   bracketSpacing: true,
@@ -58,7 +58,7 @@ const expected1 = {
   useTabs: false,
 };
 
-const expected2 = {
+const expected2: Config = {
   arrowParens: `always`,
   bracketSameLine: false,
   bracketSpacing: true,
