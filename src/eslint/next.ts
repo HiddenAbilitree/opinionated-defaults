@@ -1,3 +1,5 @@
+import type { ConfigArray } from 'typescript-eslint';
+
 import pluginNext from '@next/eslint-plugin-next';
 
 import baseConfig from './base';
@@ -5,7 +7,9 @@ import reactConfig from './react';
 import relativeConfig from './relative';
 import tsConfig from './typescript';
 
-const nextJsConfig = [
+type Rules = Record<string, undefined>;
+
+const nextJsConfig: ConfigArray = [
   ...baseConfig,
   ...reactConfig,
   ...relativeConfig,
@@ -15,8 +19,8 @@ const nextJsConfig = [
       '@next/next': pluginNext,
     },
     rules: {
-      ...pluginNext.configs.recommended.rules,
-      ...pluginNext.configs['core-web-vitals'].rules,
+      ...(pluginNext.configs.recommended.rules as unknown as Rules),
+      ...(pluginNext.configs[`core-web-vitals`].rules as unknown as Rules),
     },
   },
 ];

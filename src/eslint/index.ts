@@ -1,3 +1,5 @@
+import type { ConfigArray } from 'typescript-eslint';
+
 export { default as eslintConfigAstro } from './astro';
 export { default as eslintConfigBase } from './base';
 export { default as eslintConfigElysia } from './elysia';
@@ -11,3 +13,4 @@ export { default as eslintConfigSolid } from './solid';
 export { default as eslintConfigStylistic } from './stylistic';
 export { default as eslintConfigTurbo } from './turbo';
 export { default as eslintConfigTypescript } from './typescript';
+export const eslintConfig = (config: ConfigArray): ConfigArray => config;

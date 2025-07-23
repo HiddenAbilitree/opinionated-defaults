@@ -1,3 +1,5 @@
+import type { ConfigArray } from 'typescript-eslint';
+
 import js from '@eslint/js';
 import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
@@ -6,22 +8,22 @@ import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 // jiti does not support path aliases and this project uses these rules.
 // https://github.com/unjs/jiti/issues/373
 
-const config = [
+const config: ConfigArray = [
   js.configs.recommended,
   eslintPluginUnicorn.configs.recommended,
   {
     rules: {
       'unicorn/filename-case': [
-        'error',
+        `error`,
         {
           cases: {
             kebabCase: true,
           },
         },
       ],
-      'unicorn/no-array-for-each': ['off'],
-      'unicorn/no-array-reduce': ['off'],
-      'unicorn/prevent-abbreviations': ['off'],
+      'unicorn/no-array-for-each': [`off`],
+      'unicorn/no-array-reduce': [`off`],
+      'unicorn/prevent-abbreviations': [`off`],
     },
   },
   {
@@ -30,23 +32,29 @@ const config = [
     },
     rules: {
       'prefer-arrow-functions/prefer-arrow-functions': [
-        'error',
-        { returnStyle: 'implicit' },
+        `error`,
+        { returnStyle: `implicit` },
       ],
     },
   },
   {
     files: [
-      '**/*.ts',
-      '**/*.js',
-      '**/*.mjs',
-      '**/*.mts',
-      '**/*.tsx',
-      '**/*.jsx',
+      `**/*.ts`,
+      `**/*.js`,
+      `**/*.mjs`,
+      `**/*.mts`,
+      `**/*.tsx`,
+      `**/*.jsx`,
     ],
   },
   {
-    ignores: ['**/dist/'],
+    ignores: [`**/dist/`],
+  },
+  {
+    rules: {
+      'no-console': `warn`,
+      quotes: [`warn`, `backtick`, { avoidEscape: true }],
+    },
   },
 ];
 

@@ -1,5 +1,7 @@
+import type { ConfigArray } from 'typescript-eslint';
+
 import turboPlugin from 'eslint-plugin-turbo';
 
-const turborepoConfig = [turboPlugin.configs['flat/recommended']];
+const turborepoConfig: ConfigArray = [turboPlugin.configs[`flat/recommended`]];
 
 export default turborepoConfig;

@@ -10,14 +10,14 @@ const arrayMerge = (arr1: object, arr2: object) => {
 
   const retArr = union(arr1, arr2);
 
-  if (retArr.includes('prettier-plugin-tailwindcss')) {
+  if (retArr.includes(`prettier-plugin-tailwindcss`)) {
     retArr.push(
-      retArr.splice(retArr.indexOf('prettier-plugin-tailwindcss'), 1)[0],
+      retArr.splice(retArr.indexOf(`prettier-plugin-tailwindcss`), 1)[0],
     ); // cooked...
   }
 
   return retArr;
 };
 
-export const merge = (source: Config, ...sources: Config[]) =>
+export const merge = (source: Config, ...sources: Config[]): Config =>
   mergeWith({}, source, ...sources, arrayMerge);

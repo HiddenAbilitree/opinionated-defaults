@@ -1,6 +1,8 @@
+import type { ConfigArray } from 'typescript-eslint';
+
 import stylistic from '@stylistic/eslint-plugin';
 
-const stylisticConfig = [
+const stylisticConfig: ConfigArray = [
   stylistic.configs.all,
   {
     plugins: {

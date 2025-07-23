@@ -1,6 +1,5 @@
 const condition = true;
-const thing =
+const _thing =
   condition ?
-    'loooooooooooooooooooooooooooooooooooooooooooooong'
-  : 'looooooooooooooooooooooooooooooooooooooooooong';
-console.log(thing);
+    `loooooooooooooooooooooooooooooooooooooooooooooong`
+  : `looooooooooooooooooooooooooooooooooooooooooong`;

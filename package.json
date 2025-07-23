@@ -1,27 +1,29 @@
 {
   "name": "@hiddenability/opinionated-defaults",
   "description": "Opinionated default configurations for webdev tools.",
-  "version": "0.0.26",
+  "version": "0.1.0",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HiddenAbilitree/reasonable-defaults.git"
+    "url": "git+https://github.com/HiddenAbilitree/opinionated-defaults.git"
   },
   "type": "module",
   "scripts": {
-    "build": "bun run test run && unbuild",
-    "prepack": "bun run test run && unbuild",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "test": "vitest"
+    "build": "bun test && bun build.ts",
+    "prepack": "bun test && bun build.ts",
+    "test": "bun test",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "format": "prettier . -c",
+    "format:fix": "prettier . -w"
   },
   "exports": {
     "./eslint": {
-      "import": "./dist/eslint/index.mjs",
+      "import": "./dist/eslint/index.js",
       "types": "./dist/eslint/index.d.ts"
     },
     "./prettier": {
-      "import": "./dist/prettier/index.mjs",
+      "import": "./dist/prettier/index.js",
       "types": "./dist/prettier/index.d.ts"
     }
   },
@@ -48,7 +50,6 @@
     "eslint-plugin-solid": "^0.14.5",
     "eslint-plugin-turbo": "^2.5.5",
     "eslint-plugin-unicorn": "^59.0.1",
-    "jiti": "^2.4.2",
     "lodash": "^4.17.21",
     "prettier": "3.6.2",
     "prettier-plugin-astro": "^0.14.1",
@@ -56,10 +57,9 @@
     "typescript-eslint": "^8.37.0"
   },
   "devDependencies": {
-    "@hiddenability/opinionated-defaults": "^0.0.24",
+    "@hiddenability/opinionated-defaults": "link:@hiddenability/opinionated-defaults",
     "@types/bun": "^1.2.18",
-    "typescript": "^5.8.3",
-    "unbuild": "^3.5.0",
-    "vitest": "^3.2.4"
+    "consola": "^3.4.2",
+    "oxc-transform": "^0.77.3"
   }
 }
