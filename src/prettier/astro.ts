@@ -1,11 +1,9 @@
-import lodash from 'lodash';
 import { type Config } from 'prettier';
 
 import baseConfig from './base';
+import { prettierConfig } from './config';
 
-const { merge } = lodash;
-
-const astroConfig: Config = merge(
+const astroConfig: Config = prettierConfig(
   {
     overrides: [
       {

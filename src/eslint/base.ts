@@ -9,6 +9,19 @@ import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 // https://github.com/unjs/jiti/issues/373
 
 const config: ConfigArray = [
+  {
+    ignores: [`**/dist/`, `**/node_modules/`, `**/.direnv/`, `**/.git/`],
+  },
+  {
+    files: [
+      `**/*.ts`,
+      `**/*.js`,
+      `**/*.mjs`,
+      `**/*.mts`,
+      `**/*.tsx`,
+      `**/*.jsx`,
+    ],
+  },
   js.configs.recommended,
   eslintPluginUnicorn.configs.recommended,
   {
@@ -36,19 +49,6 @@ const config: ConfigArray = [
         { returnStyle: `implicit` },
       ],
     },
-  },
-  {
-    files: [
-      `**/*.ts`,
-      `**/*.js`,
-      `**/*.mjs`,
-      `**/*.mts`,
-      `**/*.tsx`,
-      `**/*.jsx`,
-    ],
-  },
-  {
-    ignores: [`**/dist/`],
   },
   {
     rules: {

@@ -2,7 +2,7 @@ import parser from '@typescript-eslint/parser';
 import tseslint, { type ConfigArray } from 'typescript-eslint';
 
 const typescriptConfig: ConfigArray = [
-  ...tseslint.configs.recommended,
+  ...tseslint.configs.recommendedTypeChecked,
   {
     languageOptions: {
       parser,
@@ -25,6 +25,7 @@ const typescriptConfig: ConfigArray = [
           varsIgnorePattern: `^_`,
         },
       ],
+      '@typescript-eslint/prefer-nullish-coalescing': `error`,
     },
   },
 ];

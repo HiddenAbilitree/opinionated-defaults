@@ -6,8 +6,6 @@ import { isolatedDeclaration } from 'oxc-transform';
 
 await rm(`./dist`, { force: true, recursive: true });
 
-performance.mark(`build_start`);
-
 // courtesy of:
 // https://github.com/oven-sh/bun/issues/5141#issuecomment-2595032410
 const dts: BunPlugin = {
@@ -37,8 +35,12 @@ const dts: BunPlugin = {
   },
 };
 
+performance.mark(`build_start`);
+
 await Bun.build({
   entrypoints: [`./src/eslint/index.ts`, `./src/prettier/index.ts`],
+  minify: true,
+  naming: `[dir]/[name].mjs`,
   outdir: `./dist`,
   packages: `external`,
   plugins: [dts],

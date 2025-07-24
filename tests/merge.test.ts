@@ -2,7 +2,7 @@ import type { Config } from 'prettier';
 
 import { expect, test } from 'bun:test';
 
-import { merge } from '@/src/prettier/merge';
+import { prettierConfig } from '@/src/prettier/config';
 
 const obj1: Config = {
   arrowParens: `always`,
@@ -25,7 +25,7 @@ const obj2: Config = {
   tailwindFunctions: [`cva`, `clsx`, `cn`],
 };
 
-const obj3: Config = merge(
+const obj3: Config = prettierConfig(
   {
     overrides: [
       {
@@ -86,14 +86,14 @@ const expected2: Config = {
 };
 
 test(`merge handles normal input correctly`, () => {
-  expect(merge(obj1, obj2)).toStrictEqual(expected1);
-  expect(merge(obj2, obj1)).toStrictEqual(expected1);
+  expect(prettierConfig(obj1, obj2)).toStrictEqual(expected1);
+  expect(prettierConfig(obj2, obj1)).toStrictEqual(expected1);
 });
 
 test(`merge dedups`, () => {
-  expect(merge(obj3, obj1)).toStrictEqual(obj3);
+  expect(prettierConfig(obj3, obj1)).toStrictEqual(obj3);
 });
 
 test(`merge multiple configs`, () => {
-  expect(merge(obj1, obj2, obj3)).toStrictEqual(expected2);
+  expect(prettierConfig(obj1, obj2, obj3)).toStrictEqual(expected2);
 });

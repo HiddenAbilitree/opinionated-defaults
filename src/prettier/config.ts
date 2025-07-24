@@ -2,10 +2,12 @@ import type { Config } from 'prettier';
 
 import lodash from 'lodash';
 
-const { isArray, mergeWith, union } = lodash;
+const isArray = lodash.isArray.bind(lodash);
+const mergeWith = lodash.mergeWith.bind(lodash);
+const union = lodash.union.bind(lodash);
 
 // function runs when object key matches. Returns the merge operation result
-const arrayMerge = (arr1: object, arr2: object) => {
+const arrayMerge = (arr1: Config, arr2: Config) => {
   if (!isArray(arr1) || !isArray(arr2)) return;
 
   const retArr = union(arr1, arr2);
@@ -16,8 +18,8 @@ const arrayMerge = (arr1: object, arr2: object) => {
     ); // cooked...
   }
 
-  return retArr;
+  return retArr as unknown as Config;
 };
 
-export const merge = (source: Config, ...sources: Config[]): Config =>
-  mergeWith({}, source, ...sources, arrayMerge);
+export const prettierConfig = (source: Config, ...sources: Config[]): Config =>
+  mergeWith({}, source, ...sources, arrayMerge) as Config;
