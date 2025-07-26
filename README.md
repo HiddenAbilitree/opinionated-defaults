@@ -18,6 +18,7 @@ A collection of opinionated tooling configurations.
 - eslintConfigElysia (Elysia.js)
 - eslintConfigFunctional (Enforces functional style)
 - eslintConfigNext (Next.js)
+- eslintConfigOxlint (Disables ESlint rules available in Oxlint)
 - eslintConfigPrettier (Runs Prettier as ESLint rules)
 - eslintConfigReact (General rules for React)
 - eslintConfigRelative (Enforces the use of absolute import paths using path aliases)
@@ -35,6 +36,7 @@ A collection of opinionated tooling configurations.
 - [eslint-plugin-unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn)
 - [eslint-plugin-functional](https://github.com/eslint-functional/eslint-plugin-functional)
 - [eslint-plugin-next](https://github.com/vercel/next.js/tree/canary/packages/eslint-plugin-next)
+- [eslint-plugin-oxlint](https://github.com/oxc-project/eslint-plugin-oxlint)
 - [eslint-plugin-perfectionist](https://github.com/azat-io/eslint-plugin-perfectionist)
 - [eslint-stylistic](https://github.com/eslint-stylistic/eslint-stylistic)
 
@@ -146,10 +148,11 @@ export default prettierConfig(prettierConfigBase, prettierConfigTailwind, {
 });
 ```
 
+
 ## TODO:
 
 - Improve repository structure (How to manage configuration options within eslint dir?).
 - Maybe convert into monorepo with one package per tool instead of multiple exports from one package.
 - Prevent importing overlapping configurations (i.e., Next.js ESLint config contains base config).
 - Support node module resolution.
-- Maybe make declarative configurations instead of just providing wrapped config.
+- Maybe make declarative configurations instead of just providing wrapped config modules.

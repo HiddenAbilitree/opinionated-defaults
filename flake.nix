@@ -30,6 +30,7 @@
             nodejs_24
             oxlint
             eslint_d
+            prettierd
           ]
           ++ scripts;
       };
