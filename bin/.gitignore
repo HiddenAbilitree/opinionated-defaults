@@ -1,0 +1,15 @@
+# nix
+.direnv/
+
+# cargo
+debug
+target
+
+# rustfmt
+**/*.rs.bk
+
+# windows builds 
+*.pdb
+
+# cargo mutants
+**/mutants.out*/
