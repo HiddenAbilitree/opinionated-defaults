@@ -1,12 +1,13 @@
 {
   "name": "@hiddenability/opinionated-defaults",
   "description": "Opinionated default configurations for webdev tools.",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/HiddenAbilitree/opinionated-defaults.git"
   },
+  "bin": "dist/cli/index.mjs",
   "type": "module",
   "scripts": {
     "build": "bun test && bun ./scripts/build.ts",
@@ -57,10 +58,18 @@
     "jiti": "^2.5.1",
     "lodash": "^4.17.21",
     "oxlint": "^1.8.0",
-    "prettier": "3.6.2",
+    "prettier": "^3.6.2",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "0.6.14",
     "typescript-eslint": "^8.38.0"
+  },
+   "optionalDependencies": {
+    "@hiddenability/opinionated-defaults-linux-x64": "0.1.0",
+    "@hiddenability/opinionated-defaults-linux-arm64": "0.1.0",
+    "@hiddenability/opinionated-defaults-darwin-x64": "0.1.0",
+    "@hiddenability/opinionated-defaults-darwin-arm64": "0.1.0",
+    "@hiddenability/opinionated-defaults-windows-x64": "0.1.0",
+    "@hiddenability/opinionated-defaults-windows-arm64": "0.1.0"
   },
   "devDependencies": {
     "@hiddenability/opinionated-defaults": "link:@hiddenability/opinionated-defaults",
@@ -68,6 +77,7 @@
     "@types/lodash": "^4.17.20",
     "consola": "^3.4.2",
     "eslint_d": "^14.3.0",
+    "next": "^15.4.5",
     "oxc-transform": "^0.78.0"
   }
 }

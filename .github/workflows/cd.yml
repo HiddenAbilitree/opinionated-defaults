@@ -1,0 +1,115 @@
+name: Release to NPM
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  APP_NAME: 'opinionated-defaults'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  release:
+    name: release-${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./bin
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x64-glibc
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - name: linux-arm64-glibc
+            os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+          - name: win-x64-msvc
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - name: win-arm64-msvc
+            os: windows-latest
+            target: aarch64-pc-windows-msvc
+          - name: macos-x64
+            os: macos-latest
+            target: x86_64-apple-darwin
+          - name: macos-arm64
+            os: macos-latest
+            target: aarch64-apple-darwin
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      
+      - name: Setup cross-compilation for Linux
+        if: runner.os == 'Linux'
+        run: cargo install cross --git https://github.com/cross-rs/cross --branch main
+
+      - name: Cache build dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build binary
+        run: |
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            cross build --target ${{ matrix.target }} --release
+          else
+            cargo build --target ${{ matrix.target }} --release
+          fi
+        env:
+          CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/qemu-x86_64-linux-gnu
+
+      - name: Prepare package for NPM
+        id: prep
+        shell: bash
+        run: |
+          PKG_DIR="./${{ matrix.name }}"
+          mkdir -p "${PKG_DIR}/bin"
+
+          BIN_NAME="${{ env.APP_NAME }}"
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            BIN_NAME="${BIN_NAME}.exe"
+          fi
+
+          cp "target/${{ matrix.target }}/release/${BIN_NAME}" "${PKG_DIR}/bin/"
+
+          echo "pkg_dir=${PKG_DIR}" >> $GITHUB_OUTPUT
+          echo "pkg_version=$(echo ${{ github.ref_name }} | sed 's/v//')" >> $GITHUB_OUTPUT
+
+      - name: Create package.json
+        run: envsubst < package.json.tmpl > ${{ steps.prep.outputs.pkg_dir }}/package.json
+        shell: bash
+        env:
+          NODE_VERSION: ${{ steps.prep.outputs.pkg_version }}
+          NODE_OS: $(echo ${{ matrix.name }} | cut -d '-' -f1)
+          NODE_ARCH: $(echo ${{ matrix.name }} | cut -d '-' -f2)
+          NODE_PKG_NAME: '@hiddenability/${{ env.APP_NAME }}-${{ matrix.name }}'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish to NPM
+        run: npm publish --provenance --access public
+        working-directory: ${{ steps.prep.outputs.pkg_dir }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,10 +1,13 @@
-import { type BunPlugin } from 'bun';
+import { build, type BunPlugin, file, pathToFileURL, write } from 'bun';
 import { consola } from 'consola';
 import { colorize } from 'consola/utils';
 import { rm } from 'node:fs/promises';
+import { performance } from 'node:perf_hooks';
 import { isolatedDeclaration } from 'oxc-transform';
 
-await rm(`./dist`, { force: true, recursive: true });
+await rm(`./dist/cli`, { force: true, recursive: true });
+await rm(`./dist/eslint`, { force: true, recursive: true });
+await rm(`./dist/prettier`, { force: true, recursive: true });
 
 // courtesy of:
 // https://github.com/oven-sh/bun/issues/5141#issuecomment-2595032410
@@ -14,8 +17,8 @@ const dts: BunPlugin = {
     const written = new Set<string>();
     if (!builder.config.root || !builder.config.outdir) return;
 
-    const rootPath = Bun.pathToFileURL(builder.config.root).pathname;
-    const outPath = Bun.pathToFileURL(builder.config.outdir).pathname;
+    const rootPath = pathToFileURL(builder.config.root).pathname;
+    const outPath = pathToFileURL(builder.config.outdir).pathname;
 
     builder.onStart(() => written.clear());
     builder.onLoad({ filter: /\.ts$/ }, async (args) => {
@@ -23,9 +26,9 @@ const dts: BunPlugin = {
       written.add(args.path);
       const { code } = isolatedDeclaration(
         args.path,
-        await Bun.file(args.path).text(),
+        await file(args.path).text(),
       );
-      await Bun.write(
+      await write(
         args.path
           .replace(new RegExp(`^${rootPath}`), outPath)
           .replace(/\.ts$/, `.d.ts`),
@@ -37,8 +40,12 @@ const dts: BunPlugin = {
 
 performance.mark(`build_start`);
 
-await Bun.build({
-  entrypoints: [`./src/eslint/index.ts`, `./src/prettier/index.ts`],
+await build({
+  entrypoints: [
+    `./src/eslint/index.ts`,
+    `./src/prettier/index.ts`,
+    `./src/cli/index.ts`,
+  ],
   minify: true,
   naming: `[dir]/[name].mjs`,
   outdir: `./dist`,

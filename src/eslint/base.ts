@@ -1,8 +1,8 @@
-import type { ConfigArray } from 'typescript-eslint';
-
 import js from '@eslint/js';
+import parser from '@typescript-eslint/parser';
 import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+import tseslint, { type ConfigArray } from 'typescript-eslint';
 
 // eslint-plugin-no-relative-import-paths is not used here because
 // jiti does not support path aliases and this project uses these rules.
@@ -22,8 +22,38 @@ const config: ConfigArray = [
       `**/*.jsx`,
     ],
   },
+  ...tseslint.configs.recommendedTypeChecked,
   js.configs.recommended,
   eslintPluginUnicorn.configs.recommended,
+  {
+    languageOptions: {
+      parser,
+      parserOptions: {
+        projectService: true,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-misused-promises': [
+        `error`,
+        {
+          checksVoidReturn: false,
+        },
+      ],
+      '@typescript-eslint/no-unused-vars': [
+        `error`,
+        {
+          args: `all`,
+          argsIgnorePattern: `^_`,
+          caughtErrors: `all`,
+          caughtErrorsIgnorePattern: `^_`,
+          destructuredArrayIgnorePattern: `^_`,
+          ignoreRestSiblings: true,
+          varsIgnorePattern: `^_`,
+        },
+      ],
+      '@typescript-eslint/prefer-nullish-coalescing': `error`,
+    },
+  },
   {
     rules: {
       'unicorn/filename-case': [
