@@ -25,7 +25,7 @@ fn handle_dependencies(
   valid_deps: &[&str],
   variant: &str,
 ) -> Result<(Vec<String>, Vec<String>), Box<dyn Error>> {
-  let mut present_deps = BTreeSet::from(["base".to_string(), "prettier".to_string()]);
+  let mut present_deps = BTreeSet::from(["base".to_string()]);
 
   for dep in valid_deps {
     println!("Looking for {dep}");
@@ -51,7 +51,15 @@ fn handle_dependencies(
 fn generate_config(packages: &Map<String, Value>) -> Result<(), Box<dyn Error>> {
   let (eslint_imports, eslint_spread) = handle_dependencies(
     packages,
-    &["astro", "elysia", "react", "solid-js", "turborepo", "next"],
+    &[
+      "astro",
+      "elysia",
+      "react",
+      "solid-js",
+      "turborepo",
+      "next",
+      "prettier",
+    ],
     "eslint",
   )?;
 
@@ -113,6 +121,7 @@ pub fn find_lockfile() -> Result<PathBuf, Box<dyn Error>> {
 
 fn main() -> Result<(), Box<dyn Error>> {
   let content = std::fs::read_to_string(find_lockfile().unwrap()).unwrap();
+  // bun lock is jsonc and not json so we cannot use serde_json's parser
   let data: RepoData = parse_to_serde_value(&content, &Default::default())
     .map_err(|_| "ermm bun.lock is cooked!")?
     .and_then(|value| serde_json::from_value(value).ok())

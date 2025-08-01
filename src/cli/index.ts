@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import { spawnSync } from 'node:child_process';
-import process from 'node:process';
-
+import { spawnSync } from "node:child_process";
+import { console } from "node:inspector";
+import process from "node:process";
+import { fileURLToPath } from "node:url";
 const getExePath = () => {
   const arch = process.arch;
 
@@ -14,8 +15,10 @@ const getExePath = () => {
   }
 
   try {
-    return import.meta.resolve(
-      `@hiddenability/opinionated-defaults-${os}-${arch}/bin/bin${extension}`,
+    return fileURLToPath(
+      import.meta.resolve(
+        `@hiddenability/opinionated-defaults-${os}-${arch}/bin/bin${extension}`,
+      ),
     );
   } catch {
     throw new Error(
@@ -25,8 +28,10 @@ const getExePath = () => {
 };
 
 const run = () => {
+  console.log(`doing something`, getExePath());
   const args = process.argv.slice(2);
   const processResult = spawnSync(getExePath(), args);
+
   process.exit(processResult.status ?? 0);
 };
 
