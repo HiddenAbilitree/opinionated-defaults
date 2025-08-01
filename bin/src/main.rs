@@ -20,17 +20,25 @@ fn first_uppercase(s: &str) -> String {
   }
 }
 
+struct Muehehehe<'a> {
+  packages: &'a Map<String, Value>,
+  valid_deps: &'a [&'a str],
+  default_deps: &'a [&'a str],
+  variant: &'a str,
+}
+
 fn handle_dependencies(
-  packages: &Map<String, Value>,
-  valid_deps: &[&str],
-  variant: &str,
+  Muehehehe {
+    packages,
+    valid_deps,
+    default_deps,
+    variant,
+  }: Muehehehe,
 ) -> Result<(Vec<String>, Vec<String>), Box<dyn Error>> {
-  let mut present_deps = BTreeSet::from(["base".to_string()]);
+  let mut present_deps: BTreeSet<String> = default_deps.iter().map(|dep| dep.to_string()).collect();
 
   for dep in valid_deps {
-    println!("Looking for {dep}");
     if packages.contains_key(*dep) {
-      println!("Found {}", *dep);
       present_deps.insert(dep.to_string());
     }
   }
@@ -49,20 +57,12 @@ fn handle_dependencies(
 }
 
 fn generate_config(packages: &Map<String, Value>) -> Result<(), Box<dyn Error>> {
-  let (eslint_imports, eslint_spread) = handle_dependencies(
+  let (eslint_imports, eslint_spread) = handle_dependencies(Muehehehe {
     packages,
-    &[
-      "astro",
-      "elysia",
-      "react",
-      "solid-js",
-      "turborepo",
-      "next",
-      "prettier",
-      "perfectionist",
-    ],
-    "eslint",
-  )?;
+    valid_deps: &["astro", "elysia", "react", "solid-js", "turborepo", "next"],
+    default_deps: &["base", "perfectionist", "prettier"],
+    variant: "eslint",
+  })?;
 
   let eslint_config = format!(
     r#"import {{ includeIgnoreFile }} from '@eslint/compat';
@@ -85,7 +85,12 @@ export default eslintConfig([
 
   std::fs::write("eslint.config.ts", eslint_config)?;
 
-  let (prettier_imports, _) = handle_dependencies(packages, &["tailwindcss"], "prettier")?;
+  let (prettier_imports, _) = handle_dependencies(Muehehehe {
+    packages,
+    valid_deps: &["tailwindcss"],
+    default_deps: &["base"],
+    variant: "prettier",
+  })?;
 
   let prettier_config = format!(
     r#"import {{
@@ -121,7 +126,7 @@ pub fn find_lockfile() -> Result<PathBuf, Box<dyn Error>> {
 
 fn main() -> Result<(), Box<dyn Error>> {
   let content = std::fs::read_to_string(find_lockfile().unwrap()).unwrap();
-  // bun lock is jsonc and not json so we cannot use serde_json's parser
+  // bun.lock is jsonc and not json so we cannot use serde_json's parser
   let data: RepoData = parse_to_serde_value(&content, &Default::default())
     .map_err(|_| "ermm bun.lock is cooked!")?
     .and_then(|value| serde_json::from_value(value).ok())
