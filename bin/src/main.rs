@@ -1,30 +1,30 @@
-use jsonc_parser::parse_to_serde_value;
-use serde::Deserialize;
-use serde_json::{Map, Value};
-use std::collections::BTreeSet;
-use std::error::Error;
-use std::path::PathBuf;
+/*
+ * TODO:
+ * switch to wrapped-wrapped config object for eslint ({ prettier: true } or smth)
+ */
+use {
+  anyhow::{Result, anyhow},
+  ignore::Walk,
+  jsonc_parser::parse_to_serde_value,
+  serde::Deserialize,
+  serde_json::{Map, Value, from_value},
+  std::{
+    collections::BTreeSet,
+    env::current_dir,
+    fs::{read_to_string, write},
+    path::PathBuf,
+  },
+};
 
 #[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
 struct RepoData {
   packages: Map<String, Value>,
 }
 
-// from https://stackoverflow.com/a/38406885/23438710
-fn first_uppercase(s: &str) -> String {
-  let mut c = s.chars();
-  match c.next() {
-    None => String::new(),
-    Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
-  }
-}
-
 struct Muehehehe<'a> {
   packages: &'a Map<String, Value>,
-  valid_deps: &'a [&'a str],
+  valid_deps: &'a [(&'a str, &'a str)],
   default_deps: &'a [&'a str],
-  variant: &'a str,
 }
 
 fn handle_dependencies(
@@ -32,37 +32,44 @@ fn handle_dependencies(
     packages,
     valid_deps,
     default_deps,
-    variant,
   }: Muehehehe,
-) -> Result<(Vec<String>, Vec<String>), Box<dyn Error>> {
+) -> Result<Vec<String>> {
   let mut present_deps: BTreeSet<String> = default_deps.iter().map(|dep| dep.to_string()).collect();
 
   for dep in valid_deps {
-    if packages.contains_key(*dep) {
-      present_deps.insert(dep.to_string());
+    let (k, v) = dep;
+    if packages.contains_key(*k) {
+      present_deps.insert(v.to_string());
     }
   }
 
-  let imports: Vec<String> = present_deps
-    .iter()
-    .map(|dep| format!("{variant}Config{}", first_uppercase(dep)))
-    .collect();
+  let imports: Vec<String> = present_deps.iter().cloned().collect();
 
-  let object_spread: Vec<String> = present_deps
-    .iter()
-    .map(|dep| format!("...{variant}Config{}", first_uppercase(dep)))
-    .collect();
-
-  Ok((imports, object_spread))
+  Ok(imports)
 }
 
-fn generate_config(packages: &Map<String, Value>) -> Result<(), Box<dyn Error>> {
-  let (eslint_imports, eslint_spread) = handle_dependencies(Muehehehe {
+fn generate_config(packages: &Map<String, Value>) -> Result<()> {
+  let eslint_imports = handle_dependencies(Muehehehe {
     packages,
-    valid_deps: &["astro", "elysia", "react", "solid-js", "turborepo", "next"],
-    default_deps: &["base", "perfectionist", "prettier"],
-    variant: "eslint",
+    valid_deps: &[
+      ("astro", "eslintConfigAstro"),
+      ("elysia", "eslintConfigElysia"),
+      ("react", "eslintConfigReact"),
+      ("solid-js", "eslintConfigSolid"),
+      ("turborepo", "eslintConfigTurbo"),
+      ("next", "eslintConfigNext"),
+    ],
+    default_deps: &[
+      "eslintConfigBase",
+      "eslintConfigPerfectionist",
+      "eslintConfigPrettier",
+    ],
   })?;
+
+  let eslint_spread: Vec<String> = eslint_imports
+    .iter()
+    .map(|dep| format!("...{dep}"))
+    .collect();
 
   let eslint_config = format!(
     r#"import {{ includeIgnoreFile }} from '@eslint/compat';
@@ -83,14 +90,25 @@ export default eslintConfig([
     eslint_spread.join(",\n  ")
   );
 
-  std::fs::write("eslint.config.ts", eslint_config)?;
+  write("eslint.config.ts", eslint_config)?;
 
-  let (prettier_imports, _) = handle_dependencies(Muehehehe {
+  let prettier_imports = handle_dependencies(Muehehehe {
     packages,
-    valid_deps: &["tailwindcss"],
-    default_deps: &["base"],
-    variant: "prettier",
+    valid_deps: &[("tailwindcss", "prettierConfigTailwind")],
+    default_deps: &["prettierConfigBase"],
   })?;
+
+  let mut prettier_objects = prettier_imports.clone();
+
+  if prettier_imports.contains(&String::from("prettierConfigTailwind")) {
+    let tailwind_path = String::from(
+      find_tailwind_file()
+        .expect("couldnt find ur tailwind file")
+        .to_str()
+        .expect("uhh invalid tailwind file or smth idk"),
+    );
+    prettier_objects.push(format!(r"{{ tailwindStylesheet: `{tailwind_path}`, }}"));
+  }
 
   let prettier_config = format!(
     r#"import {{
@@ -103,34 +121,65 @@ export default prettierConfig(
 );
 "#,
     prettier_imports.join(",\n  "),
-    prettier_imports.join(",\n  "),
+    prettier_objects.join(",\n  "),
   );
 
-  std::fs::write("prettier.config.mjs", prettier_config)?;
+  std::process::Command::new("bun")
+    .arg("add")
+    .arg("@hiddenability/opinionated-defaults@latest")
+    .arg("-d")
+    .output()
+    .expect("failed to spawn process");
+
+  write("prettier.config.mjs", prettier_config)?;
   Ok(())
 }
 
 // from https://github.com/lbwa/package-json-rs/blob/ac69f7bbcd6ce97698a6ebf1da8c1976239dc8ad/src/fs.rs#L10C1-L25C2
-pub fn find_lockfile() -> Result<PathBuf, Box<dyn Error>> {
-  let mut current_dir = PathBuf::from(std::env::current_dir().as_ref().unwrap());
+fn find_lockfile() -> Result<PathBuf> {
+  let mut current_dir = PathBuf::from(current_dir().as_ref().expect("probably no permissions"));
   loop {
     let path = current_dir.join("bun.lock");
     if path.exists() {
       return Ok(path);
     }
     if !current_dir.pop() {
-      panic!("erm... no bun.lock...");
+      return Err(anyhow!("no lockfile found"));
     }
   }
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
-  let content = std::fs::read_to_string(find_lockfile().unwrap()).unwrap();
+fn find_tailwind_file() -> Result<PathBuf> {
+  let binding = current_dir().expect("probably no permissions");
+  let base_dir = binding.as_path();
+  for result in Walk::new(base_dir).filter_map(|e| e.ok()) {
+    if !result.file_type().unwrap().is_file() {
+      continue;
+    }
+    let path = result.path();
+
+    if !path.exists() || path.extension().expect("probably no permissions") != "css" {
+      continue;
+    }
+
+    let contents = read_to_string(path).expect("invalid tailwind path lowkey my fault");
+
+    if contents.contains(r#"import "tailwindcss";"#) {
+      return Ok(PathBuf::from(
+        path.strip_prefix(base_dir).expect("couldnt remove prefix"),
+      ));
+    }
+  }
+  Err(anyhow!("couldnt find a tailwind file"))
+}
+
+fn main() -> Result<()> {
+  let content = read_to_string(find_lockfile().expect("couldnt find ur lockfile"))
+    .expect("couldnt read ur lockfile, prob my fault");
   // bun.lock is jsonc and not json so we cannot use serde_json's parser
-  let data: RepoData = parse_to_serde_value(&content, &Default::default())
-    .map_err(|_| "ermm bun.lock is cooked!")?
-    .and_then(|value| serde_json::from_value(value).ok())
-    .ok_or("ermm.... malformed bun.lock or smth")?;
+  let data: RepoData = parse_to_serde_value(&content, &Default::default())?
+    .and_then(|value| from_value(value).ok())
+    .expect("couldnt parse ur lockfile");
 
   generate_config(&data.packages)?;
 
