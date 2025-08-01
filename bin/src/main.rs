@@ -129,7 +129,7 @@ export default prettierConfig(
     .arg("@hiddenability/opinionated-defaults@latest")
     .arg("-d")
     .output()
-    .expect("failed to spawn process");
+    .expect("failed to install @hiddenability/opinionatede-defaults@latest");
 
   write("prettier.config.mjs", prettier_config)?;
   Ok(())

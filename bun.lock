@@ -30,7 +30,6 @@
         "prettier": "^3.6.2",
         "prettier-plugin-astro": "^0.14.1",
         "prettier-plugin-tailwindcss": "0.6.14",
-        "tailwindcss": "^4.1.11",
         "typescript-eslint": "^8.38.0",
       },
       "devDependencies": {
@@ -100,17 +99,17 @@
 
     "@hiddenability/opinionated-defaults": ["@hiddenability/opinionated-defaults@link:@hiddenability/opinionated-defaults", { "bin": "dist/cli/index.mjs" }],
 
-    "@hiddenability/opinionated-defaults-darwin-arm64": ["@hiddenability/opinionated-defaults-darwin-arm64@0.1.12", "", { "os": "darwin", "cpu": "arm64" }, "sha512-U5lt53QDVSyUlmieA5fGyEKStdsVkiLFP/d0OvSxVArbjKf1ris8qvvTOgJTLvc09/SuoWZy8mzwPdTmEsxipQ=="],
+    "@hiddenability/opinionated-defaults-darwin-arm64": ["@hiddenability/opinionated-defaults-darwin-arm64@0.1.14", "", { "os": "darwin", "cpu": "arm64" }, "sha512-PEXBeM7lmusPL0tkm6G6flIEc+9XJ6zQd4/osFR55aJSJ0sNk+cIRRcDVOCCxn/1GIHHBs7hKEtOT3kexlddgA=="],
 
-    "@hiddenability/opinionated-defaults-darwin-x64": ["@hiddenability/opinionated-defaults-darwin-x64@0.1.12", "", { "os": "darwin", "cpu": "x64" }, "sha512-1HNq0KWfnUhcFh3bsb8fpSoXi0NfEaMN4nVKaRVJg+F8W/ZNpDWLWFqkD3cU/RyG3YrH7mLKTIScpuWHebF6Qw=="],
+    "@hiddenability/opinionated-defaults-darwin-x64": ["@hiddenability/opinionated-defaults-darwin-x64@0.1.14", "", { "os": "darwin", "cpu": "x64" }, "sha512-XM1EXBU7U6n8rWXyqpaCzdAVfuLRo7wTa+tzT5y3TYjodapkkZlMXP/AWQEL0BlTXgtPgOvJh1GRAvTLKQhv/w=="],
 
-    "@hiddenability/opinionated-defaults-linux-arm64": ["@hiddenability/opinionated-defaults-linux-arm64@0.1.12", "", { "os": "linux", "cpu": "arm64" }, "sha512-9nRPDJUeSfDEyaKVK+kbc2BS34OOua+nr9WcPNxHXEY5FOv+6h2u6ctrDt26wxlKC8n6pl31JgW336k5nzQUtQ=="],
+    "@hiddenability/opinionated-defaults-linux-arm64": ["@hiddenability/opinionated-defaults-linux-arm64@0.1.14", "", { "os": "linux", "cpu": "arm64" }, "sha512-YZYS2KnD8TPSqY3ONe/1EH5Y7vfHb/sxJlOQ9lrixhdbiCEL8jpYh+jYVUv21CPs3C/590nRzkocO7c3hr0XcA=="],
 
-    "@hiddenability/opinionated-defaults-linux-x64": ["@hiddenability/opinionated-defaults-linux-x64@0.1.12", "", { "os": "linux", "cpu": "x64" }, "sha512-PZNBLTFvCozFyZoNnYi2TLefp1ZSeh2tHaWHSiRqEWki0tav2eqQV02JdczAjKsRncOa1r69IrAk70LcfW4fQg=="],
+    "@hiddenability/opinionated-defaults-linux-x64": ["@hiddenability/opinionated-defaults-linux-x64@0.1.14", "", { "os": "linux", "cpu": "x64" }, "sha512-kYGmD3RJ9XwV18dlTVk6gtGZ+aSqn4w4K42OmqqOcP4P6BsTBOOUHG7nna39vVykgi2t3C2cQnyKfVFJ4CEmGw=="],
 
-    "@hiddenability/opinionated-defaults-win-arm64": ["@hiddenability/opinionated-defaults-win-arm64@0.1.12", "", { "os": "none", "cpu": "arm64" }, "sha512-2rSsbO5qcAm3qyjTB16jp+krRIHTo1jj2wflD53E0IrZCdSl/Rz77MTk4G/QY3LyD4MloUvesPMdB7GXLWAQeA=="],
+    "@hiddenability/opinionated-defaults-win-arm64": ["@hiddenability/opinionated-defaults-win-arm64@0.1.14", "", { "os": "none", "cpu": "arm64" }, "sha512-v70whI39Ymki10VFfzkijroLtUrB//Z1g7szYqRETcrMISnnhFHWtbETtMGibEnhWJvVBL4Ooaw1ZagM9ZTOKg=="],
 
-    "@hiddenability/opinionated-defaults-win-x64": ["@hiddenability/opinionated-defaults-win-x64@0.1.12", "", { "os": "none", "cpu": "x64" }, "sha512-a6U07ks7K3iR5Po2m2iFdaqgBsOxrkBnf5MGSLC/jNhna2V0jP8/17g8kvYZf3/40v81f6Gtof4R7mxmCG7bPw=="],
+    "@hiddenability/opinionated-defaults-win-x64": ["@hiddenability/opinionated-defaults-win-x64@0.1.14", "", { "os": "none", "cpu": "x64" }, "sha512-JUYQuXcLHDnUWRNAXo8QGlw8xqxqkN96gP6EL2SbQrmFsx8ovToOUldC9QqZu06P1gZp0G6SNGyWlAgUgU1dZQ=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 
@@ -745,8 +744,6 @@
     "supports-preserve-symlinks-flag": ["supports-preserve-symlinks-flag@1.0.0", "", {}, "sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w=="],
 
     "synckit": ["synckit@0.11.11", "", { "dependencies": { "@pkgr/core": "^0.2.9" } }, "sha512-MeQTA1r0litLUf0Rp/iisCaL8761lKAZHaimlbGK4j0HysC4PLfqygQj9srcs0m2RdtDYnF8UuYyKpbjHYp7Jw=="],
-
-    "tailwindcss": ["tailwindcss@4.1.11", "", {}, "sha512-2E9TBm6MDD/xKYe+dvJZAmg3yxIEDNRc0jwlNyDg/4Fil2QcSLjFKGVff0lAf1jjeaArlG/M75Ey/EYr/OJtBA=="],
 
     "to-regex-range": ["to-regex-range@5.0.1", "", { "dependencies": { "is-number": "^7.0.0" } }, "sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ=="],
 

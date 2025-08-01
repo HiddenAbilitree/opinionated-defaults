@@ -28,7 +28,7 @@ const getExePath = () => {
 
 const run = () => {
   const args = process.argv.slice(2);
-  const processResult = spawnSync(getExePath(), args);
+  const processResult = spawnSync(getExePath(), args, { stdio: `inherit` });
 
   process.exit(processResult.status ?? 0);
 };
