@@ -14,7 +14,9 @@ const getExePath = () => {
   }
 
   try {
-    return import.meta.resolve(`app-${os}-${arch}/bin/app${extension}`);
+    return import.meta.resolve(
+      `opinionated-defaults-${os}-${arch}/bin/bin${extension}`,
+    );
   } catch {
     throw new Error(
       `Couldn't find application binary inside node_modules for ${os}-${arch}`,
