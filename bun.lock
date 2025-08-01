@@ -38,16 +38,16 @@
         "@types/lodash": "^4.17.20",
         "consola": "^3.4.2",
         "eslint_d": "^14.3.0",
-        "next": "^15.4.2-canary.25",
+        "next": "^15.4.5",
         "oxc-transform": "^0.79.1",
       },
       "optionalDependencies": {
-        "@hiddenability/opinionated-defaults-darwin-arm64": "^0.1.7",
-        "@hiddenability/opinionated-defaults-darwin-x64": "^0.1.7",
-        "@hiddenability/opinionated-defaults-linux-arm64": "^0.1.7",
-        "@hiddenability/opinionated-defaults-linux-x64": "^0.1.7",
-        "@hiddenability/opinionated-defaults-win-arm64": "^0.1.7",
-        "@hiddenability/opinionated-defaults-win-x64": "^0.1.7",
+        "@hiddenability/opinionated-defaults-darwin-arm64": "latest",
+        "@hiddenability/opinionated-defaults-darwin-x64": "latest",
+        "@hiddenability/opinionated-defaults-linux-arm64": "latest",
+        "@hiddenability/opinionated-defaults-linux-x64": "latest",
+        "@hiddenability/opinionated-defaults-win-arm64": "latest",
+        "@hiddenability/opinionated-defaults-win-x64": "latest",
       },
     },
   },
@@ -100,9 +100,15 @@
 
     "@hiddenability/opinionated-defaults": ["@hiddenability/opinionated-defaults@link:@hiddenability/opinionated-defaults", { "bin": "dist/cli/index.mjs" }],
 
-    "@hiddenability/opinionated-defaults-darwin-arm64": ["@hiddenability/opinionated-defaults-darwin-arm64@0.1.7", "", { "os": "none", "cpu": "none" }, "sha512-AMWX4pNYyStRLepmkYPDXshygBjjCrz9DwYGFWO+mVJOGBMqndyFuQu7lzjxRzib1QnJz1YghffLBOgwRgHNhA=="],
+    "@hiddenability/opinionated-defaults-darwin-arm64": ["@hiddenability/opinionated-defaults-darwin-arm64@0.1.8", "", { "os": "darwin", "cpu": "arm64" }, "sha512-QYHaAffomRxvXbnnvFvuJxK9pniqeoTpVQfmlxvnuHvPqqKx7c4rVM3C/0VqunexGd57F3lHmUbrOhIgk+jrCw=="],
 
-    "@hiddenability/opinionated-defaults-darwin-x64": ["@hiddenability/opinionated-defaults-darwin-x64@0.1.7", "", { "os": "none", "cpu": "none" }, "sha512-6Sjn4sAHzB9CCSihGNButfjNbhXPLTG0gfP7wQicsGDP1ir4zihGGxCfyd/tUy3sRRLNia5wwCvZwQ5v+RD/Cg=="],
+    "@hiddenability/opinionated-defaults-darwin-x64": ["@hiddenability/opinionated-defaults-darwin-x64@0.1.8", "", { "os": "darwin", "cpu": "x64" }, "sha512-yKyA36EA9gJbwfZknYe8VeYpBmWmVRSFB4lu19HNjtfydJJTh6OuANoGr1qcpFC6OxFV2LWhDloqIUQzBLlJ/A=="],
+
+    "@hiddenability/opinionated-defaults-linux-arm64": ["@hiddenability/opinionated-defaults-linux-arm64@0.1.8", "", { "os": "linux", "cpu": "arm64" }, "sha512-04Fd1N1z8VT1/r7nDdKc5QrFHIS1NFGyOeLtL4TUG4BQJ5Q0qD2l0TapBq9pGlh4PN+HTBBK/KcImYK2E1IH/w=="],
+
+    "@hiddenability/opinionated-defaults-linux-x64": ["@hiddenability/opinionated-defaults-linux-x64@0.1.8", "", { "os": "linux", "cpu": "x64" }, "sha512-b6IY2j0+DCgqjGGIhppJtWZQlCRXX5wqjpuOa71ORd+QDor+A3koq86uM5yqEGv9N55bqN4wQYnAoTLOaIsiUQ=="],
+
+    "@hiddenability/opinionated-defaults-win-arm64": ["@hiddenability/opinionated-defaults-win-arm64@0.1.8", "", { "os": "none", "cpu": "arm64" }, "sha512-b69ejxOBudn0+7CHLCvtsNd6o6qiaej1GVVe0FPwltdBVyf03iAWNfS6yqmvo/g7NeISEv2dC2ZYVxJfdk6Tsg=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 

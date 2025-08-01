@@ -28,10 +28,10 @@ jobs:
         include:
           - name: linux-x64-glibc
             os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
+            target: x86_64-unknown-linux-musl
           - name: linux-arm64-glibc
             os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
+            target: aarch64-unknown-linux-musl
           - name: win-x64-msvc
             os: windows-latest
             target: x86_64-pc-windows-msvc
