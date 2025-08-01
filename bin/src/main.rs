@@ -59,6 +59,7 @@ fn generate_config(packages: &Map<String, Value>) -> Result<(), Box<dyn Error>> 
       "turborepo",
       "next",
       "prettier",
+      "perfectionist",
     ],
     "eslint",
   )?;
@@ -91,7 +92,6 @@ export default eslintConfig([
   prettierConfig,
   {},
 }} from '@hiddenability/opinionated-defaults/prettier';
-import {{ fileURLToPath, URL }} from 'node:url';
 
 export default prettierConfig(
   {},
