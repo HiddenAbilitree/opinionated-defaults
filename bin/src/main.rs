@@ -13,6 +13,7 @@ use {
     env::current_dir,
     fs::{read_to_string, write},
     path::PathBuf,
+    time::Instant,
   },
 };
 
@@ -174,6 +175,8 @@ fn find_tailwind_file() -> Result<PathBuf> {
 }
 
 fn main() -> Result<()> {
+  let before = Instant::now();
+
   let content = read_to_string(find_lockfile().expect("couldnt find ur lockfile"))
     .expect("couldnt read ur lockfile, prob my fault");
   // bun.lock is jsonc and not json so we cannot use serde_json's parser
@@ -182,6 +185,8 @@ fn main() -> Result<()> {
     .expect("couldnt parse ur lockfile");
 
   generate_config(&data.packages)?;
+
+  println!("✅ Done in {:.2?}", before.elapsed());
 
   Ok(())
 }
