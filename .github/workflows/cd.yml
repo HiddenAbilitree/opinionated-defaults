@@ -19,6 +19,7 @@ jobs:
 
     defaults:
       run:
+        shell: bash
         working-directory: ./bin
 
     strategy:
@@ -78,24 +79,22 @@ jobs:
 
       - name: Prepare package for NPM
         id: prep
-        shell: bash
         run: |
           PKG_DIR="${{ matrix.name }}"
-          mkdir -p "${PKG_DIR}/bin"
+          mkdir -p "./${PKG_DIR}/bin"
 
           BIN_NAME=bin
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             BIN_NAME="${BIN_NAME}.exe"
           fi
 
-          cp "target/${{ matrix.target }}/release/bin" "./${PKG_DIR}/bin"
+          cp "target/${{ matrix.target }}/release/bin" "./${PKG_DIR}/bin/bin"
 
           echo "pkg_dir=${PKG_DIR}" >> $GITHUB_OUTPUT
           echo "pkg_version=$(echo ${{ github.ref_name }} | sed 's/v//')" >> $GITHUB_OUTPUT
 
       - name: Create package.json
         run: envsubst < package.json.tmpl > ${{ steps.prep.outputs.pkg_dir }}/package.json
-        shell: bash
         env:
           NODE_VERSION: ${{ steps.prep.outputs.pkg_version }}
           NODE_OS: $(echo ${{ matrix.name }} | cut -d '-' -f1)
