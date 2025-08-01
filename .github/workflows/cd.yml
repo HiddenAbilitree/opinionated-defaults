@@ -104,7 +104,6 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        working-directory: ${{ steps.prep.outputs.pkg_dir }}
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
