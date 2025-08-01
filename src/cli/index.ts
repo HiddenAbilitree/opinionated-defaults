@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process";
-import { console } from "node:inspector";
-import process from "node:process";
-import { fileURLToPath } from "node:url";
+import { spawnSync } from 'node:child_process';
+import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 const getExePath = () => {
   const arch = process.arch;
 
@@ -28,7 +27,6 @@ const getExePath = () => {
 };
 
 const run = () => {
-  console.log(`doing something`, getExePath());
   const args = process.argv.slice(2);
   const processResult = spawnSync(getExePath(), args);
 
