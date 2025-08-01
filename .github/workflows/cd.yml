@@ -94,7 +94,9 @@ jobs:
           echo "pkg_version=$(echo ${{ github.ref_name }} | sed 's/v//')" >> $GITHUB_OUTPUT
 
       - name: Create package.json
-        run: envsubst < package.json.tmpl > ${{ steps.prep.outputs.pkg_dir }}/package.json
+        run: |
+          envsubst < package.json.tmpl > ${{ steps.prep.outputs.pkg_dir }}/package.json
+          cp README.md ${{ steps.prep.outputs.pkg_dir }}
         env:
           NODE_VERSION: ${{ steps.prep.outputs.pkg_version }}
           NODE_OS: $(echo ${{ matrix.name }} | cut -d '-' -f1)
