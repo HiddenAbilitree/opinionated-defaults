@@ -9,6 +9,7 @@ grep = "0.3.2"
 walkdir = "2.5.0"
 anyhow = "1.0.98"
 ignore = "0.4.23"
+regex = "1.11.1"
 
 [dependencies.serde]
 version = "1.0.219"
@@ -20,4 +21,3 @@ features = ["serde"]
 
 [dev-dependencies]
 clippy = "0.0.302"
-

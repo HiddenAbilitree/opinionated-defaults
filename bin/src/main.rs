@@ -6,6 +6,7 @@ use {
   anyhow::{Result, anyhow},
   ignore::Walk,
   jsonc_parser::parse_to_serde_value,
+  regex::RegexSet,
   serde::Deserialize,
   serde_json::{Map, Value, from_value},
   std::{
@@ -108,7 +109,11 @@ export default eslintConfig([
         .to_str()
         .expect("uhh invalid tailwind file or smth idk"),
     );
-    prettier_objects.push(format!(r"{{ tailwindStylesheet: `{tailwind_path}`, }}"));
+    prettier_objects.push(format!(
+      r"{{
+  tailwindStylesheet: `./{tailwind_path}`,
+}}"
+    ));
   }
 
   let prettier_config = format!(
@@ -117,12 +122,10 @@ export default eslintConfig([
   {},
 }} from '@hiddenability/opinionated-defaults/prettier';
 
-export default prettierConfig(
-  {},
-);
+export default prettierConfig({});
 "#,
     prettier_imports.join(",\n  "),
-    prettier_objects.join(",\n  "),
+    prettier_objects.join(", "),
   );
 
   std::process::Command::new("bun")
@@ -153,10 +156,15 @@ fn find_lockfile() -> Result<PathBuf> {
 fn find_tailwind_file() -> Result<PathBuf> {
   let binding = current_dir().expect("probably no permissions");
   let base_dir = binding.as_path();
+
+  let tailwind_regex =
+    RegexSet::new([r#"@import ["']tailwindcss["'];"#, r#"@tailwind base;"#]).unwrap();
+
   for result in Walk::new(base_dir).filter_map(|e| e.ok()) {
     if !result.file_type().unwrap().is_file() {
       continue;
     }
+
     let path = result.path();
 
     if !path.exists() || path.extension().expect("probably no permissions") != "css" {
@@ -165,7 +173,7 @@ fn find_tailwind_file() -> Result<PathBuf> {
 
     let contents = read_to_string(path).expect("invalid tailwind path lowkey my fault");
 
-    if contents.contains(r#"import "tailwindcss";"#) {
+    if tailwind_regex.is_match(&contents) {
       return Ok(PathBuf::from(
         path.strip_prefix(base_dir).expect("couldnt remove prefix"),
       ));
