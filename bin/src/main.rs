@@ -14,6 +14,7 @@ use {
     env::current_dir,
     fs::{read_to_string, write},
     path::PathBuf,
+    process::Command,
     time::Instant,
   },
 };
@@ -103,12 +104,11 @@ export default eslintConfig([
   let mut prettier_objects = prettier_imports.clone();
 
   if prettier_imports.contains(&String::from("prettierConfigTailwind")) {
-    let tailwind_path = String::from(
-      find_tailwind_file()
-        .expect("couldnt find ur tailwind file")
-        .to_str()
-        .expect("uhh invalid tailwind file or smth idk"),
-    );
+    let tailwind_path = find_tailwind_file()?
+      .to_str()
+      .ok_or_else(|| anyhow!("could not find tailwind file"))?
+      .to_string();
+
     prettier_objects.push(format!(
       r"{{
   tailwindStylesheet: `./{tailwind_path}`,
@@ -127,13 +127,6 @@ export default prettierConfig({});
     prettier_imports.join(",\n  "),
     prettier_objects.join(", "),
   );
-
-  std::process::Command::new("bun")
-    .arg("add")
-    .arg("@hiddenability/opinionated-defaults@latest")
-    .arg("-d")
-    .output()
-    .expect("failed to install @hiddenability/opinionated-defaults@latest");
 
   write("prettier.config.mjs", prettier_config)?;
   Ok(())
@@ -154,29 +147,37 @@ fn find_lockfile() -> Result<PathBuf> {
 }
 
 fn find_tailwind_file() -> Result<PathBuf> {
-  let binding = current_dir().expect("probably no permissions");
+  let binding = current_dir()?;
   let base_dir = binding.as_path();
 
-  let tailwind_regex =
-    RegexSet::new([r#"@import ["']tailwindcss["'];"#, r#"@tailwind base;"#]).unwrap();
+  let tailwind_regex = RegexSet::new([r#"@import ["']tailwindcss["'];"#, r#"@tailwind base;"#])?;
 
   for result in Walk::new(base_dir).filter_map(|e| e.ok()) {
-    if !result.file_type().unwrap().is_file() {
+    if let Some(file_type) = result.file_type()
+      && !file_type.is_file()
+    {
       continue;
     }
 
     let path = result.path();
 
-    if !path.exists() || path.extension().expect("probably no permissions") != "css" {
+    if !path.exists() {
       continue;
     }
 
-    let contents = read_to_string(path).expect("invalid tailwind path lowkey my fault");
+    if let Some(extension) = path.extension()
+      && extension != "css"
+    {
+      continue;
+    }
+
+    let contents = match read_to_string(path) {
+      Ok(output) => output,
+      Err(_) => continue,
+    };
 
     if tailwind_regex.is_match(&contents) {
-      return Ok(PathBuf::from(
-        path.strip_prefix(base_dir).expect("couldnt remove prefix"),
-      ));
+      return Ok(PathBuf::from(path.strip_prefix(base_dir)?));
     }
   }
   Err(anyhow!("couldnt find a tailwind file"))
@@ -185,12 +186,44 @@ fn find_tailwind_file() -> Result<PathBuf> {
 fn main() -> Result<()> {
   let before = Instant::now();
 
-  let content = read_to_string(find_lockfile().expect("couldnt find ur lockfile"))
-    .expect("couldnt read ur lockfile, prob my fault");
+  if Command::new("bun")
+    .arg("add")
+    .arg("@hiddenability/opinionated-defaults@latest")
+    .arg("-d")
+    .arg("--save-text-lockfile")
+    .output()
+    .is_err()
+  {
+    eprintln!("Could not install @hiddenability/opinionated-defaults@latest with bun.");
+    return Ok(());
+  }
+
+  let content = read_to_string(match find_lockfile() {
+    Ok(something) => something,
+    Err(_) => {
+      eprintln!("Could not find a valid lockfile.");
+      return Ok(());
+    }
+  });
+
+  let content = match content {
+    Ok(content) => content,
+    Err(_) => {
+      eprintln!("Could not read the lockfile.");
+      return Ok(());
+    }
+  };
+
   // bun.lock is jsonc and not json so we cannot use serde_json's parser
-  let data: RepoData = parse_to_serde_value(&content, &Default::default())?
+  let data: RepoData = match parse_to_serde_value(&content, &Default::default())?
     .and_then(|value| from_value(value).ok())
-    .expect("couldnt parse ur lockfile");
+  {
+    Some(data) => data,
+    None => {
+      eprintln!("Could not parse the lockfile.");
+      return Ok(());
+    }
+  };
 
   generate_config(&data.packages)?;
 
