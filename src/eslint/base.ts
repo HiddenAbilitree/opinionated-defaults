@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import parser from '@typescript-eslint/parser';
 import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+import globals from 'globals';
 import tseslint, { type ConfigArray } from 'typescript-eslint';
 
 // eslint-plugin-no-relative-import-paths is not used here because
@@ -27,6 +28,10 @@ const config: ConfigArray = [
   eslintPluginUnicorn.configs.recommended,
   {
     languageOptions: {
+      globals: {
+        ...globals.nodeBuiltin,
+        ...globals.browser,
+      },
       parser,
       parserOptions: {
         projectService: true,
