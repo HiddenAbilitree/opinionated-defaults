@@ -24,6 +24,17 @@ struct RepoData {
   packages: Map<String, Value>,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct TSConfig {
+  compiler_options: Option<CompilerOptions>,
+}
+
+#[derive(Deserialize)]
+struct CompilerOptions {
+  paths: Option<Map<String, Value>>,
+}
+
 struct Muehehehe<'a> {
   packages: &'a Map<String, Value>,
   valid_deps: &'a [(&'a str, &'a str)],
@@ -52,7 +63,7 @@ fn handle_dependencies(
 }
 
 fn generate_config(packages: &Map<String, Value>) -> Result<()> {
-  let eslint_imports = handle_dependencies(Muehehehe {
+  let mut eslint_imports = handle_dependencies(Muehehehe {
     packages,
     valid_deps: &[
       ("astro", "eslintConfigAstro"),
@@ -69,10 +80,24 @@ fn generate_config(packages: &Map<String, Value>) -> Result<()> {
     ],
   })?;
 
-  let eslint_spread: Vec<String> = eslint_imports
-    .iter()
-    .map(|dep| format!("...{dep}"))
-    .collect();
+  let tsconfig = read_to_string(find_file("tsconfig.json").unwrap()).unwrap();
+
+  let tsconfig_data: TSConfig = match parse_to_serde_value(&tsconfig, &Default::default())?
+    .and_then(|value| from_value(value).ok())
+  {
+    Some(data) => data,
+    None => {
+      eprintln!("Could not parse tsconfig.json");
+      return Ok(());
+    }
+  };
+
+  if let Some(compiler_options) = tsconfig_data.compiler_options
+    && let Some(paths) = compiler_options.paths
+    && !paths.is_empty()
+  {
+    eslint_imports.push("eslintConfigRelative".to_string());
+  }
 
   let eslint_config = format!(
     r#"import {{ includeIgnoreFile }} from '@eslint/compat';
@@ -90,7 +115,11 @@ export default eslintConfig([
 ]);
 "#,
     eslint_imports.join(",\n  "),
-    eslint_spread.join(",\n  ")
+    eslint_imports
+      .iter()
+      .map(|dep| format!("...{dep}"))
+      .collect::<Vec<String>>()
+      .join(",\n  ")
   );
 
   let prettier_imports = handle_dependencies(Muehehehe {
@@ -132,10 +161,10 @@ export default prettierConfig({});
 }
 
 // from https://github.com/lbwa/package-json-rs/blob/ac69f7bbcd6ce97698a6ebf1da8c1976239dc8ad/src/fs.rs#L10C1-L25C2
-fn find_lockfile() -> Result<PathBuf> {
+fn find_file(filename: &str) -> Result<PathBuf> {
   let mut current_dir = PathBuf::from(current_dir().as_ref().expect("probably no permissions"));
   loop {
-    let path = current_dir.join("bun.lock");
+    let path = current_dir.join(filename);
     if path.exists() {
       return Ok(path);
     }
@@ -188,6 +217,7 @@ fn main() -> Result<()> {
   if Command::new("bun")
     .arg("add")
     .arg("@hiddenability/opinionated-defaults@latest")
+    .arg("@types/node")
     .arg("-d")
     .arg("--save-text-lockfile")
     .output()
@@ -196,19 +226,8 @@ fn main() -> Result<()> {
     eprintln!("Could not install @hiddenability/opinionated-defaults@latest with bun.");
     return Ok(());
   }
-  if Command::new("bun")
-    .arg("add")
-    .arg("@types/node")
-    .arg("-d")
-    .arg("--save-text-lockfile")
-    .output()
-    .is_err()
-  {
-    eprintln!("Could not install @types/node with bun.");
-    return Ok(());
-  }
 
-  let content = read_to_string(match find_lockfile() {
+  let content = read_to_string(match find_file("bun.lock") {
     Ok(something) => something,
     Err(_) => {
       eprintln!("Could not find a valid lockfile.");
