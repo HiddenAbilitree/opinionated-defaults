@@ -93,8 +93,6 @@ export default eslintConfig([
     eslint_spread.join(",\n  ")
   );
 
-  write("eslint.config.ts", eslint_config)?;
-
   let prettier_imports = handle_dependencies(Muehehehe {
     packages,
     valid_deps: &[("tailwindcss", "prettierConfigTailwind")],
@@ -104,16 +102,16 @@ export default eslintConfig([
   let mut prettier_objects = prettier_imports.clone();
 
   if prettier_imports.contains(&String::from("prettierConfigTailwind")) {
-    let tailwind_path = find_tailwind_file()?
-      .to_str()
-      .ok_or_else(|| anyhow!("could not find tailwind file"))?
-      .to_string();
-
-    prettier_objects.push(format!(
-      r"{{
+    if let Ok(tailwind_path) = find_tailwind_file() {
+      let tailwind_path = tailwind_path.to_str().unwrap().to_string();
+      prettier_objects.push(format!(
+        r"{{
   tailwindStylesheet: `./{tailwind_path}`,
 }}"
-    ));
+      ));
+    } else {
+      eprintln!("TailwindCSS dependency found but could not find a relevant css file. Skipping...")
+    }
   }
 
   let prettier_config = format!(
@@ -128,6 +126,7 @@ export default prettierConfig({});
     prettier_objects.join(", "),
   );
 
+  write("eslint.config.ts", eslint_config)?;
   write("prettier.config.mjs", prettier_config)?;
   Ok(())
 }
@@ -195,6 +194,17 @@ fn main() -> Result<()> {
     .is_err()
   {
     eprintln!("Could not install @hiddenability/opinionated-defaults@latest with bun.");
+    return Ok(());
+  }
+  if Command::new("bun")
+    .arg("add")
+    .arg("@types/node")
+    .arg("-d")
+    .arg("--save-text-lockfile")
+    .output()
+    .is_err()
+  {
+    eprintln!("Could not install @types/node with bun.");
     return Ok(());
   }
 
