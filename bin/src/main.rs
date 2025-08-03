@@ -3,21 +3,22 @@
  * switch to wrapped-wrapped config object for eslint ({ prettier: true } or smth)
  */
 use {
-  anyhow::{Result, anyhow},
-  ignore::Walk,
+  crate::utils::{find_file, find_tailwind_file},
+  anyhow::Result,
   jsonc_parser::parse_to_serde_value,
-  regex::RegexSet,
+  pathdiff::diff_paths,
   serde::Deserialize,
   serde_json::{Map, Value, from_value},
   std::{
     collections::BTreeSet,
     env::current_dir,
     fs::{read_to_string, write},
-    path::PathBuf,
     process::Command,
     time::Instant,
   },
 };
+
+mod utils;
 
 #[derive(Deserialize)]
 struct RepoData {
@@ -39,6 +40,12 @@ struct Muehehehe<'a> {
   packages: &'a Map<String, Value>,
   valid_deps: &'a [(&'a str, &'a str)],
   default_deps: &'a [&'a str],
+}
+
+struct Gitignore {
+  import: String,
+  var: String,
+  config: String,
 }
 
 fn handle_dependencies(
@@ -80,41 +87,61 @@ fn generate_config(packages: &Map<String, Value>) -> Result<()> {
     ],
   })?;
 
-  let tsconfig = read_to_string(find_file("tsconfig.json").unwrap()).unwrap();
+  if let Some(tsconfig) = find_file("tsconfig.json") {
+    let tsconfig_contents = read_to_string(tsconfig)?;
+    let parsed_config = parse_to_serde_value(&tsconfig_contents, &Default::default())?
+      .and_then(|value| from_value::<TSConfig>(value).ok());
 
-  let tsconfig_data: TSConfig = match parse_to_serde_value(&tsconfig, &Default::default())?
-    .and_then(|value| from_value(value).ok())
-  {
-    Some(data) => data,
-    None => {
-      eprintln!("Could not parse tsconfig.json");
-      return Ok(());
+    match parsed_config {
+      Some(config) => {
+        if config
+          .compiler_options
+          .and_then(|opts| opts.paths)
+          .is_some_and(|paths| !paths.is_empty())
+        {
+          eslint_imports.push("eslintConfigRelative".to_string());
+        }
+      }
+      None => {
+        eprintln!("Could not parse tsconfig.json. Skipping relative check...");
+      }
     }
-  };
-
-  if let Some(compiler_options) = tsconfig_data.compiler_options
-    && let Some(paths) = compiler_options.paths
-    && !paths.is_empty()
-  {
-    eslint_imports.push("eslintConfigRelative".to_string());
   }
 
+  let gitignore: Gitignore = match find_file(".gitignore") {
+    Some(path) => {
+      let var_string = format!(
+        "\nconst gitignorePath = fileURLToPath(new URL(`{}`, import.meta.url));\n",
+        diff_paths(&path, current_dir()?).unwrap().to_str().unwrap()
+      );
+      Gitignore {
+        import: "import { includeIgnoreFile } from '@eslint/compat';\n".to_string(),
+        var: var_string,
+        config: "includeIgnoreFile(gitignorePath, `Imported .gitignore patterns`),\n  ".to_string(),
+      }
+    }
+    None => Gitignore {
+      import: "".to_string(),
+      var: "".to_string(),
+      config: "".to_string(),
+    },
+  };
+
   let eslint_config = format!(
-    r#"import {{ includeIgnoreFile }} from '@eslint/compat';
-import {{
+    r#"{}import {{
   eslintConfig,
   {},
 }} from '@hiddenability/opinionated-defaults/eslint';
 import {{ fileURLToPath, URL }} from 'node:url';
-
-const gitignorePath = fileURLToPath(new URL(`.gitignore`, import.meta.url));
-
+{}
 export default eslintConfig([
-  includeIgnoreFile(gitignorePath, `Imported .gitignore patterns`),
-  {},
+  {}{},
 ]);
 "#,
+    gitignore.import,
     eslint_imports.join(",\n  "),
+    gitignore.var,
+    gitignore.config,
     eslint_imports
       .iter()
       .map(|dep| format!("...{dep}"))
@@ -130,7 +157,7 @@ export default eslintConfig([
 
   let mut prettier_objects = prettier_imports.clone();
 
-  if prettier_imports.contains(&String::from("prettierConfigTailwind")) {
+  if prettier_imports.contains(&"prettierConfigTailwind".to_string()) {
     if let Ok(tailwind_path) = find_tailwind_file() {
       let tailwind_path = tailwind_path.to_str().unwrap().to_string();
       prettier_objects.push(format!(
@@ -160,59 +187,10 @@ export default prettierConfig({});
   Ok(())
 }
 
-// from https://github.com/lbwa/package-json-rs/blob/ac69f7bbcd6ce97698a6ebf1da8c1976239dc8ad/src/fs.rs#L10C1-L25C2
-fn find_file(filename: &str) -> Result<PathBuf> {
-  let mut current_dir = PathBuf::from(current_dir().as_ref().expect("probably no permissions"));
-  loop {
-    let path = current_dir.join(filename);
-    if path.exists() {
-      return Ok(path);
-    }
-    if !current_dir.pop() {
-      return Err(anyhow!("no lockfile found"));
-    }
-  }
-}
-
-fn find_tailwind_file() -> Result<PathBuf> {
-  let binding = current_dir()?;
-  let base_dir = binding.as_path();
-
-  let tailwind_regex = RegexSet::new([r#"@import ["']tailwindcss["'];"#, r#"@tailwind base;"#])?;
-
-  for result in Walk::new(base_dir).filter_map(|e| e.ok()) {
-    if let Some(file_type) = result.file_type()
-      && !file_type.is_file()
-    {
-      continue;
-    }
-
-    let path = result.path();
-
-    if !path.exists() {
-      continue;
-    }
-
-    if let Some(extension) = path.extension()
-      && extension != "css"
-    {
-      continue;
-    }
-
-    let contents = match read_to_string(path) {
-      Ok(output) => output,
-      Err(_) => continue,
-    };
-
-    if tailwind_regex.is_match(&contents) {
-      return Ok(PathBuf::from(path.strip_prefix(base_dir)?));
-    }
-  }
-  Err(anyhow!("couldnt find a tailwind file"))
-}
-
 fn main() -> Result<()> {
   let before = Instant::now();
+
+  env_logger::init();
 
   if Command::new("bun")
     .arg("add")
@@ -228,8 +206,8 @@ fn main() -> Result<()> {
   }
 
   let content = read_to_string(match find_file("bun.lock") {
-    Ok(something) => something,
-    Err(_) => {
+    Some(something) => something,
+    None => {
       eprintln!("Could not find a valid lockfile.");
       return Ok(());
     }

@@ -36,6 +36,7 @@
         "@hiddenability/opinionated-defaults": "link:@hiddenability/opinionated-defaults",
         "@types/bun": "^1.2.19",
         "@types/lodash": "^4.17.20",
+        "@types/node": "^24.1.0",
         "consola": "^3.4.2",
         "eslint_d": "^14.3.0",
         "oxc-transform": "^0.79.1",
