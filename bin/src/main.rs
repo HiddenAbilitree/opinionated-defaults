@@ -74,7 +74,6 @@ fn generate_config(packages: &Map<String, Value>) -> Result<()> {
     packages,
     valid_deps: &[
       ("astro", "eslintConfigAstro"),
-      ("elysia", "eslintConfigElysia"),
       ("react", "eslintConfigReact"),
       ("solid-js", "eslintConfigSolid"),
       ("turborepo", "eslintConfigTurbo"),
@@ -132,7 +131,7 @@ fn generate_config(packages: &Map<String, Value>) -> Result<()> {
   eslintConfig,
   {},
 }} from '@hiddenability/opinionated-defaults/eslint';
-import {{ fileURLToPath, URL }} from 'node:url';
+import {{ fileURLToPath }} from 'node:url';
 {}
 export default eslintConfig([
   {}{},

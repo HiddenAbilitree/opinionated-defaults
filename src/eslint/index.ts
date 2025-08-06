@@ -1,7 +1,6 @@
 export { default as eslintConfigAstro } from './astro';
 export { default as eslintConfigBase } from './base';
 export { eslintConfig } from './config';
-export { default as eslintConfigElysia } from './elysia';
 export { default as eslintConfigFunctional } from './functional';
 export { default as eslintConfigNext } from './next';
 export { default as eslintConfigOxlint } from './oxlint';
