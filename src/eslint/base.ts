@@ -57,6 +57,18 @@ const config: ConfigArray = [
         },
       ],
       '@typescript-eslint/prefer-nullish-coalescing': `error`,
+      'no-unused-vars': [
+        `error`,
+        {
+          args: `all`,
+          argsIgnorePattern: `^_`,
+          caughtErrors: `all`,
+          caughtErrorsIgnorePattern: `^_`,
+          destructuredArrayIgnorePattern: `^_`,
+          ignoreRestSiblings: true,
+          varsIgnorePattern: `^_`,
+        },
+      ],
     },
   },
   {
