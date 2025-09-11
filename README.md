@@ -1,6 +1,6 @@
 # ![Banner](/assets/banner.svg)
 
-A collection of opinionated tooling configurations.
+A collection of opinionated webdev tooling configurations.
 
 ## Supported Framework Configurations:
 
