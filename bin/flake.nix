@@ -35,7 +35,7 @@
         buildInputs = let
           f = fenix.packages.${system};
         in [
-          (f.complete.withComponents [
+          (f.latest.withComponents [
             "cargo"
             "clippy"
             "rust-src"

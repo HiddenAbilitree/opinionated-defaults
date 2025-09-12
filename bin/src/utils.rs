@@ -1,16 +1,19 @@
 use {
-  anyhow::{Result, anyhow},
   ignore::Walk,
-  log::info,
+  log::{error, info, trace},
   regex::RegexSet,
   std::{env::current_dir, fs::read_to_string, path::PathBuf},
 };
 
 // from https://github.com/lbwa/package-json-rs/blob/main/src/fs.rs#L10-L25
 pub fn find_file(filename: &str) -> Option<PathBuf> {
-  let mut current_dir = PathBuf::from(current_dir().as_ref().expect("probably no permissions"));
+  let Ok(mut current_dir) = current_dir() else {
+    error!("Could not read current dir, probably no permissions.");
+    return None;
+  };
   loop {
     let path = current_dir.join(filename);
+    trace!("Current path: {:?}", path.to_str());
     if path.exists() {
       info!("Found {}", path.to_str().unwrap());
       return Some(path);
@@ -21,11 +24,35 @@ pub fn find_file(filename: &str) -> Option<PathBuf> {
   }
 }
 
-pub fn find_tailwind_file() -> Result<PathBuf> {
-  let binding = current_dir()?;
-  let base_path = binding.as_path();
+pub fn find_first_file(filenames: Vec<&str>) -> Option<PathBuf> {
+  let Ok(mut current_dir) = current_dir() else {
+    error!("Could not read current dir, probably no permissions.");
+    return None;
+  };
+  loop {
+    for filename in &filenames {
+      let path = current_dir.join(filename);
+      trace!("Current path: {:?}", path.to_str());
+      if path.exists() {
+        info!("Found {}", path.to_str().unwrap());
+        return Some(path);
+      }
+    }
+    if !current_dir.pop() {
+      return None;
+    }
+  }
+}
 
-  let tailwind_regex = RegexSet::new([r#"@import ["']tailwindcss["'];"#, r#"@tailwind base;"#])?;
+pub fn find_tailwind_file() -> Option<PathBuf> {
+  let Ok(current_dir) = current_dir() else {
+    error!("Could not read current dir, probably no permissions.");
+    return None;
+  };
+  let base_path = current_dir.as_path();
+
+  let tailwind_regex =
+    RegexSet::new([r#"@import ["']tailwindcss["'];"#, r#"@tailwind base;"#]).unwrap();
 
   for result in Walk::new(base_path).filter_map(|e| e.ok()) {
     if result.file_type().filter(|file| file.is_file()).is_none() {
@@ -49,15 +76,16 @@ pub fn find_tailwind_file() -> Result<PathBuf> {
     };
 
     if tailwind_regex.is_match(&contents) {
-      let stripped_path = path.strip_prefix(base_path)?;
+      let stripped_path = path.strip_prefix(base_path).unwrap();
 
       info!(
         "stripped tailwind path: {}",
         stripped_path.to_str().unwrap()
       );
 
-      return Ok(PathBuf::from(path.strip_prefix(base_path)?));
+      return Some(PathBuf::from(stripped_path));
     }
   }
-  Err(anyhow!("couldnt find a tailwind file"))
+
+  None
 }
