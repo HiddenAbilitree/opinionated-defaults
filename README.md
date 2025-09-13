@@ -1,7 +1,11 @@
 <div align="center">
   
 # ![Banner](/assets/banner.svg)
+
+![Demo](/assets/demo.gif)
+
 A collection of opinionated web-dev tooling configurations.
+
 
 ![GitHub Tag](https://img.shields.io/github/v/tag/hiddenabilitree/opinionated-defaults?style=for-the-badge)
 ![NPM Downloads](https://img.shields.io/npm/d18m/%40hiddenability%2Fopinionated-defaults?style=for-the-badge)

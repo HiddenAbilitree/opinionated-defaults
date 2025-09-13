@@ -21,6 +21,7 @@
         (mkScript "build" ''bun run build'')
         (mkScript "lint" ''oxlint && eslint_d'')
         (mkScript "lint:fix" ''oxlint --fix --fix-suggestions && eslint_d --fix'')
+        (mkScript "demo" ''vhs demo.tape --output ./assets/demo.gif'')
       ];
     in {
       default = pkgs.mkShell {
@@ -30,6 +31,8 @@
             nodejs_24
             oxlint
             eslint_d
+            vhs
+            difftastic
           ]
           ++ scripts;
       };
