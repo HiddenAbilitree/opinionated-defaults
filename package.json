@@ -1,7 +1,7 @@
 {
   "name": "@hiddenability/opinionated-defaults",
   "description": "Opinionated default configurations for webdev tools.",
-  "version": "0.1.28",
+  "version": "0.1.31",
   "license": "MIT",
   "repository": {
     "type": "git",
