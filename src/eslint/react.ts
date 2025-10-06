@@ -8,6 +8,19 @@ const reactConfig: ConfigArray = defineConfig([
   pluginReact.configs.flat[`recommended`]!,
   pluginReact.configs.flat[`jsx-runtime`]!,
   {
+    ignores: [`**/dist/`, `**/node_modules/`, `**/.direnv/`, `**/.git/`],
+  },
+  {
+    files: [
+      `**/*.ts`,
+      `**/*.js`,
+      `**/*.mjs`,
+      `**/*.mts`,
+      `**/*.tsx`,
+      `**/*.jsx`,
+    ],
+  },
+  {
     extends: [`react-hooks/recommended`],
     plugins: {
       'react-hooks': pluginReactHooks,
