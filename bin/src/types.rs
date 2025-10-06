@@ -124,9 +124,7 @@ impl PackageManager {
 
     if *self == PackageManager::BunOld {
       cmd.arg("--save-text-lockfile");
-      eprintln!(
-        "⚠️ Detected deprecated bun.lockb file. Make sure to delete it later.\nRun bunx @hiddenability/opinionated-defaults again to get a more accurate config."
-      );
+      eprintln!("⚠️ Detected deprecated bun.lockb file. Make sure to delete it later.");
     }
 
     cmd
@@ -166,10 +164,4 @@ pub struct Dependencies {
   pub packages: Map<String, Value>,
   pub valid_deps: Vec<(String, String)>,
   pub default_deps: Vec<String>,
-}
-
-pub struct Gitignore {
-  pub import: String,
-  pub var: String,
-  pub config: String,
 }

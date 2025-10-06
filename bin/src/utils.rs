@@ -24,6 +24,25 @@ pub fn find_file(filename: &str) -> Option<PathBuf> {
   }
 }
 
+pub fn find_files(filename: &str) -> Vec<PathBuf> {
+  let mut files = vec![];
+  let Ok(mut current_dir) = current_dir() else {
+    error!("Could not read current dir, probably no permissions.");
+    return files;
+  };
+  loop {
+    let path = current_dir.join(filename);
+    trace!("Current path: {:?}", path.to_str());
+    if path.exists() {
+      info!("Found {}", path.to_str().unwrap());
+      files.push(path);
+    }
+    if !current_dir.pop() {
+      return files;
+    }
+  }
+}
+
 pub fn find_first_file(filenames: Vec<&str>) -> Option<PathBuf> {
   let Ok(mut current_dir) = current_dir() else {
     error!("Could not read current dir, probably no permissions.");

@@ -1,6 +1,6 @@
 use std::fs::read_to_string;
 
-use log::{info, trace};
+use log::info;
 
 use crate::{
   types::{PackageManager, Packages, ProjectData},

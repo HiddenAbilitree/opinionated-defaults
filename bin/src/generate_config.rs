@@ -1,8 +1,8 @@
 use {
   crate::{
     handle_dependencies::handle_dependencies,
-    types::{Dependencies, Gitignore, TSConfig},
-    utils::{find_file, find_tailwind_file},
+    types::{Dependencies, TSConfig},
+    utils::{find_file, find_files, find_tailwind_file},
   },
   anyhow::Result,
   jsonc_parser::parse_to_serde_value,
@@ -52,24 +52,18 @@ pub fn generate_config(packages: Map<String, Value>) -> Result<()> {
     }
   }
 
-  let gitignore: Gitignore = match find_file(".gitignore") {
-    Some(path) => {
-      let var_string = format!(
-        "\nconst gitignorePath = fileURLToPath(new URL(`{}`, import.meta.url));\n",
-        diff_paths(&path, current_dir()?).unwrap().to_str().unwrap()
-      );
-      Gitignore {
-        import: "import { includeIgnoreFile } from '@eslint/compat';\n".to_string(),
-        var: var_string,
-        config: "includeIgnoreFile(gitignorePath, `Imported .gitignore patterns`),\n  ".to_string(),
-      }
-    }
-    None => Gitignore {
-      import: "".to_string(),
-      var: "".to_string(),
-      config: "".to_string(),
-    },
-  };
+  let gitignores: Vec<String> = find_files(".gitignore")
+    .iter()
+    .map(|path| {
+      format!(
+        "includeIgnoreFile(fileURLToPath(new URL(`{}`, import.meta.url)), ``),",
+        diff_paths(path, current_dir().unwrap())
+          .unwrap()
+          .to_str()
+          .unwrap()
+      )
+    })
+    .collect();
 
   let eslint_config = format!(
     r#"{}import {{
@@ -77,15 +71,18 @@ pub fn generate_config(packages: Map<String, Value>) -> Result<()> {
   {},
 }} from '@hiddenability/opinionated-defaults/eslint';
 import {{ fileURLToPath }} from 'node:url';
-{}
+
 export default eslintConfig([
-  {}{},
+  {}
+  {},
 ]);
 "#,
-    gitignore.import,
+    match gitignores.is_empty() {
+      true => "",
+      false => "import { includeIgnoreFile } from '@eslint/compat';\n",
+    },
     eslint_imports.join(",\n  "),
-    gitignore.var,
-    gitignore.config,
+    gitignores.join("\n\t"),
     eslint_imports
       .iter()
       .map(|dep| format!("...{dep}"))

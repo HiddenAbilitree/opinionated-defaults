@@ -1,7 +1,7 @@
 {
   "name": "@hiddenability/opinionated-defaults",
   "description": "Opinionated default configurations for webdev tools.",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -74,11 +74,11 @@
     "oxc-transform": "^0.94.0"
   },
   "optionalDependencies": {
-    "@hiddenability/opinionated-defaults-darwin-arm64": "^0.1.27",
-    "@hiddenability/opinionated-defaults-darwin-x64": "^0.1.27",
-    "@hiddenability/opinionated-defaults-linux-arm64": "^0.1.27",
-    "@hiddenability/opinionated-defaults-linux-x64": "^0.1.27",
-    "@hiddenability/opinionated-defaults-win-arm64": "^0.1.27",
-    "@hiddenability/opinionated-defaults-win-x64": "^0.1.27"
+    "@hiddenability/opinionated-defaults-darwin-arm64": "^0.1.31",
+    "@hiddenability/opinionated-defaults-darwin-x64": "^0.1.31",
+    "@hiddenability/opinionated-defaults-linux-arm64": "^0.1.31",
+    "@hiddenability/opinionated-defaults-linux-x64": "^0.1.31",
+    "@hiddenability/opinionated-defaults-win-arm64": "^0.1.31",
+    "@hiddenability/opinionated-defaults-win-x64": "^0.1.31"
   }
 }

@@ -24,7 +24,7 @@ fn main() -> Result<()> {
 
   env_logger::init();
 
-  let project_data = get_package_manager_data().unwrap_or_else(|| {
+  let mut project_data = get_package_manager_data().unwrap_or_else(|| {
     warn!("Could not find an existing package manager, defaulting to bun...");
     ProjectData {
       packages: Packages::new(),
@@ -39,6 +39,24 @@ fn main() -> Result<()> {
     );
 
     return Ok(());
+  }
+
+  if project_data.manager == PackageManager::BunOld {
+    if project_data.manager.command().output().is_err() {
+      eprintln!(
+        "❌ Could not install @hiddenability/opinionated-defaults@latest with {}.",
+        project_data.manager.cli()
+      );
+
+      return Ok(());
+    }
+    project_data = get_package_manager_data().unwrap_or_else(|| {
+      warn!("Could not find an existing package manager, defaulting to bun...");
+      ProjectData {
+        packages: Packages::new(),
+        manager: PackageManager::Bun,
+      }
+    });
   }
 
   generate_config(project_data.packages)?;

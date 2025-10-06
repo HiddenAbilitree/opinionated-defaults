@@ -6,6 +6,9 @@ type Rules = Record<string, undefined>;
 
 const nextJsConfig: ConfigArray = [
   {
+    ignores: [`**/next-env.d.ts`],
+  },
+  {
     plugins: {
       '@next/next': pluginNext,
     },

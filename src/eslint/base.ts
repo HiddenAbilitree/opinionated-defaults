@@ -11,13 +11,7 @@ import tseslint, { type ConfigArray } from 'typescript-eslint';
 
 const config: ConfigArray = [
   {
-    ignores: [
-      `**/dist/`,
-      `**/node_modules/`,
-      `**/.direnv/`,
-      `**/.git/`,
-      `**/.next/`,
-    ],
+    ignores: [`**/dist/`, `**/node_modules/`, `**/.git/`],
   },
   {
     files: [
