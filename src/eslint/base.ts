@@ -97,12 +97,6 @@ const config: ConfigArray = [
       ],
     },
   },
-  {
-    rules: {
-      'no-console': `warn`,
-      quotes: [`warn`, `backtick`, { avoidEscape: true }],
-    },
-  },
 ];
 
 export default config;
