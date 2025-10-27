@@ -7,7 +7,6 @@ const eslintPrettierConfig: ConfigArray = [
   {
     rules: {
       'prettier/prettier': `warn`,
-      quotes: [`warn`, `backtick`, { avoidEscape: true }],
     },
   },
 ];

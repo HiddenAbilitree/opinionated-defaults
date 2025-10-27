@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import stylistic from '@stylistic/eslint-plugin';
 import parser from '@typescript-eslint/parser';
 import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
@@ -98,9 +99,11 @@ const config: ConfigArray = [
     },
   },
   {
+    plugins: {
+      '@stylistic': stylistic,
+    },
     rules: {
-      'no-console': `warn`,
-      quotes: [`warn`, `backtick`, { avoidEscape: true }],
+      '@stylistic/quotes': [`error`, `backtick`],
     },
   },
 ];

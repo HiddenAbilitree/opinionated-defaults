@@ -9,5 +9,4 @@ export { default as eslintConfigPrettier } from './prettier';
 export { default as eslintConfigReact } from './react';
 export { default as eslintConfigRelative } from './relative';
 export { default as eslintConfigSolid } from './solid';
-export { default as eslintConfigStylistic } from './stylistic';
 export { default as eslintConfigTurbo } from './turbo';
