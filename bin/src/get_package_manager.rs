@@ -1,31 +1,27 @@
-use std::fs::read_to_string;
-
-use log::info;
-
-use crate::{
-  types::{PackageManager, Packages, ProjectData},
-  utils::find_first_file,
+use {
+  crate::{
+    types::{PackageManager, Packages, ProjectData},
+    utils::find_first_file,
+  },
+  log::info,
+  std::fs::read_to_string,
 };
 
 pub fn get_package_manager_data() -> Option<ProjectData> {
-  let path = find_first_file(PackageManager::iterator().map(|pm| pm.lockfile()).collect())?;
+  let lockfiles: Vec<_> = PackageManager::ALL.iter().map(|pm| pm.lockfile()).collect();
+  let path = find_first_file(&lockfiles)?;
 
-  let package_manager = PackageManager::from_lockfile(path.file_name().unwrap());
+  let manager = PackageManager::from_lockfile(path.file_name()?);
+  info!("Lockfile path: {}", path.display());
 
-  info!("Lockfile Path: {:#?}", path);
+  let content = read_to_string(&path).ok()?;
+  let packages = manager
+    .parse_lockfile(&content)
+    .map(|data| data.packages)
+    .unwrap_or_else(|_| {
+      eprintln!("❌ Could not parse the lockfile. Falling back to defaults...");
+      Packages::new()
+    });
 
-  let content = read_to_string(path).unwrap();
-
-  // trace!("Lockfile Contents:\n{:#?}", content);
-
-  Some(ProjectData {
-    packages: package_manager
-      .parse_lockfile(content)
-      .map(|repo_data| repo_data.packages)
-      .unwrap_or_else(|_| {
-        eprintln!("❌ Could not parse the lockfile. Falling back to defaults..."); 
-        Packages::new()
-      }),
-    manager: package_manager,
-  })
+  Some(ProjectData { packages, manager })
 }
