@@ -3,10 +3,10 @@ use {
   jsonc_parser::parse_to_serde_value,
   serde::Deserialize,
   serde_json::{Map, Value, from_value},
-  std::{ffi::OsStr, process::Command, slice::Iter},
+  std::{ffi::OsStr, process::Command},
 };
 
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PackageManager {
   Bun,
   BunOld,
@@ -22,43 +22,40 @@ pub struct ProjectData {
 }
 
 impl PackageManager {
-  pub fn iterator() -> Iter<'static, PackageManager> {
-    static PACKAGE_MANAGERS: [PackageManager; 6] = [
-      PackageManager::Bun,
-      PackageManager::BunOld,
-      PackageManager::Deno,
-      PackageManager::Npm,
-      PackageManager::Yarn,
-      PackageManager::Pnpm,
-    ];
-    PACKAGE_MANAGERS.iter()
-  }
+  pub const ALL: [Self; 6] = [
+    Self::Bun,
+    Self::BunOld,
+    Self::Deno,
+    Self::Npm,
+    Self::Yarn,
+    Self::Pnpm,
+  ];
 
-  // unreachable is fine since this is only called when
-  // we know that the lockfile name is one of the following
-  pub fn from_lockfile(lockfile_path: &OsStr) -> PackageManager {
-    match lockfile_path.to_str().unwrap() {
-      "bun.lock" => PackageManager::Bun,
-      "bun.lockb" => PackageManager::BunOld,
-      "deno.lock" => PackageManager::Deno,
-      "package-lock.json" => PackageManager::Npm,
-      "yarn.lock" => PackageManager::Yarn,
-      "pnpm-lock.yaml" => PackageManager::Pnpm,
-      _ => unreachable!(),
+  pub fn from_lockfile(lockfile_path: &OsStr) -> Self {
+    match lockfile_path
+      .to_str()
+      .expect("lockfile path should be valid UTF-8")
+    {
+      "bun.lock" => Self::Bun,
+      "bun.lockb" => Self::BunOld,
+      "deno.lock" => Self::Deno,
+      "package-lock.json" => Self::Npm,
+      "yarn.lock" => Self::Yarn,
+      "pnpm-lock.yaml" => Self::Pnpm,
+      other => panic!("unrecognized lockfile: {other}"),
     }
   }
 
-  pub fn parse_lockfile(&self, contents: String) -> Result<JSONLockfile> {
-    match *self {
-      PackageManager::Bun => {
+  pub fn parse_lockfile(&self, contents: &str) -> Result<JSONLockfile> {
+    match self {
+      Self::Bun => {
         // bun.lock is jsonc and not json so we cannot use serde_json's parser
-        let data: JSONLockfile = parse_to_serde_value(&contents, &Default::default())?
+        parse_to_serde_value(contents, &Default::default())?
           .and_then(|value| from_value(value).ok())
-          .unwrap();
-        Ok(data)
+          .ok_or_else(|| anyhow::anyhow!("failed to parse bun.lock"))
       }
-      PackageManager::BunOld => {
-        let data: PackageJSON = serde_json::from_str(&contents)?;
+      Self::BunOld => {
+        let data: PackageJSON = serde_json::from_str(contents)?;
         let packages: Packages = data
           .dependencies
           .into_iter()
@@ -68,41 +65,38 @@ impl PackageManager {
 
         Ok(JSONLockfile { packages })
       }
-      PackageManager::Deno => todo!(),
-      PackageManager::Npm => {
-        let data: JSONLockfile = serde_json::from_str(&contents)?;
-        Ok(data)
-      }
-      PackageManager::Yarn => todo!(),
-      PackageManager::Pnpm => todo!(),
+      Self::Deno => todo!("deno lockfile parsing not implemented"),
+      Self::Npm => Ok(serde_json::from_str(contents)?),
+      Self::Yarn => todo!("yarn lockfile parsing not implemented"),
+      Self::Pnpm => todo!("pnpm lockfile parsing not implemented"),
     }
   }
 
-  pub fn lockfile(&self) -> &str {
-    match *self {
-      PackageManager::Bun => "bun.lock",
-      PackageManager::BunOld => "bun.lockb",
-      PackageManager::Deno => "deno.lock",
-      PackageManager::Npm => "package-lock.json",
-      PackageManager::Yarn => "yarn.lock",
-      PackageManager::Pnpm => "pnpm-lock.yaml",
+  pub const fn lockfile(self) -> &'static str {
+    match self {
+      Self::Bun => "bun.lock",
+      Self::BunOld => "bun.lockb",
+      Self::Deno => "deno.lock",
+      Self::Npm => "package-lock.json",
+      Self::Yarn => "yarn.lock",
+      Self::Pnpm => "pnpm-lock.yaml",
     }
   }
 
-  pub fn cli(&self) -> &str {
-    match *self {
-      PackageManager::Bun => "bun",
-      PackageManager::BunOld => "bun",
-      PackageManager::Deno => "deno",
-      PackageManager::Npm => "npm",
-      PackageManager::Yarn => "yarn",
-      PackageManager::Pnpm => "pnpm",
+  pub const fn cli(self) -> &'static str {
+    match self {
+      Self::Bun | Self::BunOld => "bun",
+      Self::Deno => "deno",
+      Self::Npm => "npm",
+      Self::Yarn => "yarn",
+      Self::Pnpm => "pnpm",
     }
   }
-  pub fn command(&self) -> Command {
+
+  pub fn command(self) -> Command {
     let mut cmd = Command::new(self.cli());
 
-    if *self == PackageManager::Deno {
+    if self == Self::Deno {
       cmd
         .arg("add")
         .arg("npm:@hiddenability/opinionated-defaults@latest")
@@ -110,19 +104,19 @@ impl PackageManager {
       return cmd;
     }
 
-    let (i, dev) = match self {
-      PackageManager::Npm => ("i", "-D"),
-      PackageManager::Bun | PackageManager::BunOld => ("add", "-d"),
+    let (subcmd, dev_flag) = match self {
+      Self::Npm => ("i", "-D"),
+      Self::Bun | Self::BunOld => ("add", "-d"),
       _ => ("add", "-D"),
     };
 
     cmd
-      .arg(i)
+      .arg(subcmd)
       .arg("@hiddenability/opinionated-defaults@latest")
       .arg("@types/node")
-      .arg(dev);
+      .arg(dev_flag);
 
-    if *self == PackageManager::BunOld {
+    if self == Self::BunOld {
       cmd.arg("--save-text-lockfile");
       eprintln!("⚠️ Detected deprecated bun.lockb file. Make sure to delete it later.");
     }
@@ -141,11 +135,13 @@ pub struct JSONLockfile {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PackageJSON {
+  #[serde(default)]
   pub dependencies: Packages,
-  #[serde(rename = "devDependencies")]
+  #[serde(default)]
   pub dev_dependencies: Packages,
-  #[serde(rename = "peerDependencies")]
+  #[serde(default)]
   pub peer_dependencies: Packages,
 }
 
@@ -153,11 +149,24 @@ pub struct PackageJSON {
 #[serde(rename_all = "camelCase")]
 pub struct TSConfig {
   pub compiler_options: Option<CompilerOptions>,
+  pub include: Option<Vec<String>>,
+  pub files: Option<Vec<String>>,
+  pub references: Option<Value>,
+}
+
+impl TSConfig {
+  pub fn is_solution_style(&self) -> bool {
+    self.references.is_some()
+      && (self.compiler_options.is_none() || self.files.as_ref().is_some_and(Vec::is_empty))
+  }
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CompilerOptions {
   pub paths: Option<Map<String, Value>>,
+  #[serde(default)]
+  pub allow_js: bool,
 }
 
 pub struct Dependencies {
