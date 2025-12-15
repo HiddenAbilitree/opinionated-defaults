@@ -34,7 +34,9 @@ const config: ConfigArray = [
       },
       parser,
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: [`prettier.config.mjs`],
+        },
       },
     },
     rules: {

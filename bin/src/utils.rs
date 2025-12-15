@@ -5,106 +5,77 @@ use {
   std::{env::current_dir, fs::read_to_string, path::PathBuf},
 };
 
-// from https://github.com/lbwa/package-json-rs/blob/main/src/fs.rs#L10-L25
+/// Iterator that yields each ancestor directory starting from the current dir.
+fn ancestors() -> Option<impl Iterator<Item = PathBuf>> {
+  current_dir()
+    .map_err(|_| error!("Could not read current dir, probably no permissions."))
+    .ok()
+    .map(|start| std::iter::successors(Some(start), |p| p.parent().map(PathBuf::from)))
+}
+
+/// Find a single file by name, searching upward from the current directory.
 pub fn find_file(filename: &str) -> Option<PathBuf> {
-  let Ok(mut current_dir) = current_dir() else {
-    error!("Could not read current dir, probably no permissions.");
-    return None;
-  };
-  loop {
-    let path = current_dir.join(filename);
-    trace!("Current path: {:?}", path.to_str());
-    if path.exists() {
-      info!("Found {}", path.to_str().unwrap());
-      return Some(path);
-    }
-    if !current_dir.pop() {
-      return None;
-    }
-  }
+  ancestors()?.find_map(|dir| {
+    let path = dir.join(filename);
+    trace!("Checking: {}", path.display());
+    path.exists().then(|| {
+      info!("Found {}", path.display());
+      path
+    })
+  })
 }
 
+/// Find all files by name, searching upward from the current directory.
 pub fn find_files(filename: &str) -> Vec<PathBuf> {
-  let mut files = vec![];
-  let Ok(mut current_dir) = current_dir() else {
-    error!("Could not read current dir, probably no permissions.");
-    return files;
+  let Some(ancestors) = ancestors() else {
+    return Vec::new();
   };
-  loop {
-    let path = current_dir.join(filename);
-    trace!("Current path: {:?}", path.to_str());
-    if path.exists() {
-      info!("Found {}", path.to_str().unwrap());
-      files.push(path);
-    }
-    if !current_dir.pop() {
-      return files;
-    }
-  }
+
+  ancestors
+    .filter_map(|dir| {
+      let path = dir.join(filename);
+      trace!("Checking: {}", path.display());
+      path.exists().then(|| {
+        info!("Found {}", path.display());
+        path
+      })
+    })
+    .collect()
 }
 
-pub fn find_first_file(filenames: Vec<&str>) -> Option<PathBuf> {
-  let Ok(mut current_dir) = current_dir() else {
-    error!("Could not read current dir, probably no permissions.");
-    return None;
-  };
-  loop {
-    for filename in &filenames {
-      let path = current_dir.join(filename);
-      trace!("Current path: {:?}", path.to_str());
-      if path.exists() {
-        info!("Found {}", path.to_str().unwrap());
-        return Some(path);
-      }
-    }
-    if !current_dir.pop() {
-      return None;
-    }
-  }
+/// Find the first matching file from a list of filenames, searching upward.
+pub fn find_first_file(filenames: &[&str]) -> Option<PathBuf> {
+  ancestors()?.find_map(|dir| {
+    filenames.iter().find_map(|filename| {
+      let path = dir.join(filename);
+      trace!("Checking: {}", path.display());
+      path.exists().then(|| {
+        info!("Found {}", path.display());
+        path
+      })
+    })
+  })
 }
 
 pub fn find_tailwind_file() -> Option<PathBuf> {
-  let Ok(current_dir) = current_dir() else {
-    error!("Could not read current dir, probably no permissions.");
-    return None;
-  };
-  let base_path = current_dir.as_path();
-
+  let base_path = current_dir().ok()?;
   let tailwind_regex =
     RegexSet::new([r#"@import ["']tailwindcss["'];"#, r#"@tailwind base;"#]).unwrap();
 
-  for result in Walk::new(base_path).filter_map(|e| e.ok()) {
-    if result.file_type().filter(|file| file.is_file()).is_none() {
-      continue;
-    }
+  Walk::new(&base_path)
+    .filter_map(Result::ok)
+    .filter(|entry| entry.file_type().is_some_and(|ft| ft.is_file()))
+    .filter(|entry| entry.path().extension().is_some_and(|ext| ext == "css"))
+    .find_map(|entry| {
+      let path = entry.path();
+      let contents = read_to_string(path).ok()?;
 
-    let path = result.path();
-
-    if !path.exists()
-      || path
-        .extension()
-        .filter(|extension| *extension == "css")
-        .is_none()
-    {
-      continue;
-    }
-
-    let contents = match read_to_string(path) {
-      Ok(output) => output,
-      Err(_) => continue,
-    };
-
-    if tailwind_regex.is_match(&contents) {
-      let stripped_path = path.strip_prefix(base_path).unwrap();
-
-      info!(
-        "stripped tailwind path: {}",
-        stripped_path.to_str().unwrap()
-      );
-
-      return Some(PathBuf::from(stripped_path));
-    }
-  }
-
-  None
+      if tailwind_regex.is_match(&contents) {
+        let stripped = path.strip_prefix(&base_path).ok()?;
+        info!("Found tailwind file: {}", stripped.display());
+        Some(stripped.to_path_buf())
+      } else {
+        None
+      }
+    })
 }
