@@ -2,7 +2,7 @@ import type { Config } from 'prettier';
 
 import { expect, test } from 'bun:test';
 
-import { prettierConfig } from '@/src/prettier/config';
+import { prettierConfig } from '../src/prettier/config';
 
 const obj1: Config = {
   arrowParens: `always`,

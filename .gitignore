@@ -41,3 +41,7 @@ yarn-error.log*
 
 # demo project
 demo/
+
+test-projects/
+
+target
