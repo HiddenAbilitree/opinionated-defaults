@@ -24,7 +24,7 @@ const dts: BunPlugin = {
     builder.onLoad({ filter: /\.ts$/ }, async (args) => {
       if (!args.path.startsWith(rootPath) || written.has(args.path)) return;
       written.add(args.path);
-      const { code } = isolatedDeclaration(
+      const { code } = await isolatedDeclaration(
         args.path,
         await file(args.path).text(),
       );
