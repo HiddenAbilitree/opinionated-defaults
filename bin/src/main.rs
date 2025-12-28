@@ -1,11 +1,7 @@
-// TODO: switch to wrapped-wrapped config object for eslint ({ prettier: true } or smth)
-
-mod generate_config;
-mod get_package_manager;
-mod handle_dependencies;
-mod types;
-mod utils;
-
+/*
+ * TODO:
+ * switch to wrapped-wrapped config object for eslint ({ prettier: true } or smth)
+ */
 use {
   crate::{
     generate_config::generate_config,
@@ -17,48 +13,58 @@ use {
   std::time::Instant,
 };
 
-fn default_project() -> ProjectData {
-  warn!("Could not find an existing package manager, defaulting to bun...");
-  ProjectData {
-    packages: Packages::new(),
-    manager: PackageManager::Bun,
-  }
-}
-
-fn run_install(manager: PackageManager) -> bool {
-  if manager.command().output().is_err() {
-    eprintln!(
-      "❌ Could not install @hiddenability/opinionated-defaults@latest with {}.",
-      manager.cli()
-    );
-    return false;
-  }
-  true
-}
+mod generate_config;
+mod get_package_manager;
+mod handle_dependencies;
+mod types;
+mod utils;
 
 fn main() -> Result<()> {
-  let start = Instant::now();
+  let before = Instant::now();
+
   env_logger::init();
 
-  let mut project = get_package_manager_data().unwrap_or_else(default_project);
+  let mut project_data = get_package_manager_data().unwrap_or_else(|| {
+    warn!("Could not find an existing package manager, defaulting to bun...");
+    ProjectData {
+      packages: Packages::new(),
+      manager: PackageManager::Bun,
+    }
+  });
 
-  if !run_install(project.manager) {
+  if project_data.manager.command().output().is_err() {
+    eprintln!(
+      "❌ Could not install @hiddenability/opinionated-defaults@latest with {}.",
+      project_data.manager.cli()
+    );
+
     return Ok(());
   }
 
-  if project.manager == PackageManager::BunOld {
-    if !run_install(project.manager) {
+  if project_data.manager == PackageManager::BunOld {
+    if project_data.manager.command().output().is_err() {
+      eprintln!(
+        "❌ Could not install @hiddenability/opinionated-defaults@latest with {}.",
+        project_data.manager.cli()
+      );
+
       return Ok(());
     }
-    project = get_package_manager_data().unwrap_or_else(default_project);
+    project_data = get_package_manager_data().unwrap_or_else(|| {
+      warn!("Could not find an existing package manager, defaulting to bun...");
+      ProjectData {
+        packages: Packages::new(),
+        manager: PackageManager::Bun,
+      }
+    });
   }
 
-  generate_config(project.packages)?;
+  generate_config(project_data.packages)?;
 
   println!(
     "✅ Done in {:.2?} using {}",
-    start.elapsed(),
-    project.manager.cli()
+    before.elapsed(),
+    project_data.manager.cli()
   );
 
   Ok(())
