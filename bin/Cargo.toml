@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-serde_json = { version = "1.0.141", features = ["preserve_order"] }
+serde_json = "1.0.141"
 grep = "0.3.2"
 walkdir = "2.5.0"
 anyhow = "1.0.98"

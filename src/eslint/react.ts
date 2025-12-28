@@ -7,7 +7,12 @@ import { defineConfig } from 'eslint/config';
 const reactConfig: ConfigArray = defineConfig([
   pluginReact.configs.flat[`recommended`]!,
   pluginReact.configs.flat[`jsx-runtime`]!,
-  pluginReactHooks.configs.flat[`recommended-latest`],
+  {
+    extends: [`react-hooks/recommended`],
+    plugins: {
+      'react-hooks': pluginReactHooks,
+    },
+  },
   {
     settings: {
       react: {

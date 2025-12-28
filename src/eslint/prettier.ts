@@ -10,7 +10,7 @@ const eslintPrettierConfig: ConfigArray = [
       '@stylistic': stylistic,
     },
     rules: {
-      '@stylistic/quotes': [`warn`, `backtick`, { avoidEscape: true }],
+      '@stylistic/quotes': ['warn', 'backtick', { avoidEscape: true }],
       'prettier/prettier': `warn`,
     },
   },

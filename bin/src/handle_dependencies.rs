@@ -1,14 +1,23 @@
-use {crate::types::Dependencies, log::info, std::collections::BTreeSet};
+use {crate::types::Dependencies, anyhow::Result, log::info, std::collections::BTreeSet};
 
-pub fn handle_dependencies(deps: Dependencies) -> Vec<String> {
-  let mut present: BTreeSet<String> = deps.default_deps.into_iter().collect();
+pub fn handle_dependencies(
+  Dependencies {
+    packages,
+    valid_deps,
+    default_deps,
+  }: Dependencies,
+) -> Result<Vec<String>> {
+  let mut present_deps: BTreeSet<String> = default_deps.iter().map(|dep| dep.to_string()).collect();
 
-  for (pkg_name, import_name) in deps.valid_deps {
-    if deps.packages.contains_key(&pkg_name) {
-      info!("Found dependency {pkg_name}");
-      present.insert(import_name);
+  for dep in valid_deps {
+    let (k, v) = dep;
+    if packages.contains_key(&k) {
+      info!("Found dependency {k}");
+      present_deps.insert(v.to_string());
     }
   }
 
-  present.into_iter().collect()
+  let imports: Vec<String> = present_deps.iter().cloned().collect();
+
+  Ok(imports)
 }
