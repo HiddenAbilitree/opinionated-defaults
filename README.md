@@ -29,11 +29,11 @@ This package contains a CLI that can be used to generate both eslint.config.ts a
 
 You can use it by running one of the following commands.
 
-```
+```sh
 bunx @hiddenability/opinionated-defaults
 ```
 
-```
+```sh
 npx @hiddenability/opinionated-defaults
 ```
 
