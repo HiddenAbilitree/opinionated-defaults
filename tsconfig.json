@@ -25,5 +25,5 @@
     "baseUrl": "./"
   },
   "exclude": ["node_modules", "dist"],
-  "include": ["**/*.ts", "**/*.mjs"]
+  "include": ["**/*.ts", "**/*.tsx", "**/*.mjs"]
 }

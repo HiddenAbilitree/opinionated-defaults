@@ -1,0 +1,17 @@
+{
+  "arrowParens": "always",
+  "bracketSameLine": false,
+  "bracketSpacing": true,
+  "jsxSingleQuote": true,
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "useTabs": false,
+  "sortImports": {
+    "newlinesBetween": true
+  },
+  "sortTailwindcss": {
+    "functions": ["cva", "clsx", "cn"]
+  }
+}
