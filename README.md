@@ -75,6 +75,26 @@ npx @hiddenability/opinionated-defaults
 - [eslint-plugin-perfectionist](https://github.com/azat-io/eslint-plugin-perfectionist)
 - [eslint-stylistic](https://github.com/eslint-stylistic/eslint-stylistic)
 
+### Oxlint:
+
+#### Enabled plugins:
+
+- typescript
+- unicorn
+- oxc
+- import
+- react
+- react-perf
+- nextjs
+- promise
+- node
+- jsx-a11y
+
+### Oxfmt:
+
+- Import sorting (with newlines between groups)
+- Tailwind CSS class sorting (supports `cva`, `clsx`, `cn`)
+
 ### Prettier:
 
 - Astro
@@ -108,6 +128,23 @@ npm i @hiddenability/opinionated-defaults -D
 ```
 
 ## Usage:
+
+### Oxlint:
+
+Extend the config in your `.oxlintrc.json`:
+
+```json
+{
+  "extends": [
+    "./node_modules/@hiddenability/opinionated-defaults/dist/oxlintrc.json"
+  ]
+}
+```
+
+### Oxfmt:
+
+> [!NOTE]
+> Oxfmt does not yet support an `extends` field ([see here](https://github.com/oxc-project/oxc/issues/16394)), so the config must be copied into the project config location.
 
 ### Eslint:
 
