@@ -1,5 +1,6 @@
 export { default as eslintConfigAstro } from './astro';
 export { default as eslintConfigBase } from './base';
+export { default as eslintConfigBetterTailwindcss } from './better-tailwindcss';
 export { eslintConfig } from './config';
 export { default as eslintConfigDefaultProject } from './default-project';
 export { default as eslintConfigFunctional } from './functional';

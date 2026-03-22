@@ -25,9 +25,7 @@ A collection of opinionated web-dev tooling configurations.
 > 
 > **Currently, the only supported package managers are bun and npm**.
 
-This package contains a CLI that can be used to generate both eslint.config.ts and prettier.config.mjs files.
-
-You can use it by running one of the following commands.
+This package contains a CLI that generates config files for your project. It will prompt you to choose between ESLint + Prettier or Oxlint + Oxfmt.
 
 ```sh
 bunx @hiddenability/opinionated-defaults
@@ -35,6 +33,13 @@ bunx @hiddenability/opinionated-defaults
 
 ```sh
 npx @hiddenability/opinionated-defaults
+```
+
+You can skip the prompt with flags:
+
+```sh
+bunx @hiddenability/opinionated-defaults -es  # ESLint + Prettier
+bunx @hiddenability/opinionated-defaults -ox  # Oxlint + Oxfmt
 ```
 
 ## Supported Framework Configurations:
@@ -75,6 +80,36 @@ npx @hiddenability/opinionated-defaults
 - [eslint-plugin-perfectionist](https://github.com/azat-io/eslint-plugin-perfectionist)
 - [eslint-stylistic](https://github.com/eslint-stylistic/eslint-stylistic)
 
+### Oxlint (ESLint replacement):
+
+#### Exports:
+
+- oxlintConfig (Config object for `oxlint.config.ts`)
+
+#### Enabled plugins:
+
+- typescript
+- unicorn
+- oxc
+- import
+- react
+- react-perf
+- nextjs
+- promise
+- node
+- jsx-a11y
+
+### Oxfmt (Prettier replacement):
+
+#### Exports:
+
+- oxfmtConfig (Config object for `oxfmt.config.ts`)
+
+#### Built-in features:
+
+- Import sorting (with newlines between groups)
+- Tailwind CSS class sorting (supports `cva`, `clsx`, `cn`)
+
 ### Prettier:
 
 - Astro
@@ -108,6 +143,26 @@ npm i @hiddenability/opinionated-defaults -D
 ```
 
 ## Usage:
+
+### Oxlint:
+
+```ts
+// oxlint.config.ts
+import { defineConfig } from 'oxlint';
+import { oxlintConfig } from '@hiddenability/opinionated-defaults/oxlint';
+
+export default defineConfig(oxlintConfig);
+```
+
+### Oxfmt:
+
+```ts
+// oxfmt.config.ts
+import { defineConfig } from 'oxfmt';
+import { oxfmtConfig } from '@hiddenability/opinionated-defaults/oxfmt';
+
+export default defineConfig(oxfmtConfig);
+```
 
 ### Eslint:
 
@@ -170,7 +225,7 @@ For example, given the following css file:
 @import 'tailwindcss';
 ```
 
-This should be a minimal version of your Prettier config:
+This could be a minimal version of your Prettier config:
 
 ```ts
 // prettier.config.mjs

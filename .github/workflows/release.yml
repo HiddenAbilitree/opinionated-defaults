@@ -58,6 +58,10 @@ jobs:
         if: runner.os == 'Linux'
         run: cargo install cross --git https://github.com/cross-rs/cross --branch main
 
+      - name: Copy config files for cross-compilation
+        if: runner.os == 'Linux'
+        run: cp ../src/oxlintrc.json ../src/oxfmtrc.json src/
+
       - name: Build binary
         run: |
           if [[ "${{ runner.os }}" == "Linux" ]]; then
@@ -137,6 +141,9 @@ jobs:
 
       - name: install dependencies
         run: bun link && bun ci
+
+      - name: set version from tag
+        run: npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version
 
       - name: release new version
         run: npm publish --provenance --access public

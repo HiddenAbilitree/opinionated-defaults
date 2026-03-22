@@ -8,6 +8,10 @@ import { isolatedDeclaration } from 'oxc-transform';
 await rm(`./dist/cli`, { force: true, recursive: true });
 await rm(`./dist/eslint`, { force: true, recursive: true });
 await rm(`./dist/prettier`, { force: true, recursive: true });
+await rm(`./dist/oxlint`, { force: true, recursive: true });
+await rm(`./dist/oxfmt`, { force: true, recursive: true });
+await rm(`./dist/oxlintrc.json`, { force: true });
+await rm(`./dist/oxfmtrc.json`, { force: true });
 
 // courtesy of:
 // https://github.com/oven-sh/bun/issues/5141#issuecomment-2595032410
@@ -45,6 +49,8 @@ await build({
     `./src/eslint/index.ts`,
     `./src/prettier/index.ts`,
     `./src/cli/index.ts`,
+    `./src/oxlint/index.ts`,
+    `./src/oxfmt/index.ts`,
   ],
   minify: true,
   naming: `[dir]/[name].mjs`,
@@ -54,6 +60,9 @@ await build({
   root: `src`,
   target: `node`,
 });
+
+await write(`./dist/oxlintrc.json`, file(`./src/oxlintrc.json`));
+await write(`./dist/oxfmtrc.json`, file(`./src/oxfmtrc.json`));
 
 performance.mark(`build_end`);
 

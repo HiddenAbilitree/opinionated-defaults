@@ -13,6 +13,7 @@
     "verbatimModuleSyntax": true,
     "strict": true,
     "strictNullChecks": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
@@ -25,5 +26,5 @@
     "baseUrl": "./"
   },
   "exclude": ["node_modules", "dist"],
-  "include": ["**/*.ts", "**/*.mjs"]
+  "include": ["**/*.ts", "**/*.tsx", "**/*.mjs"]
 }

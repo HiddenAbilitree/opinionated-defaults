@@ -7,6 +7,12 @@ use {
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Tooling {
+  Eslint,
+  Ox,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PackageManager {
   Bun,
   BunOld,
@@ -93,14 +99,25 @@ impl PackageManager {
     }
   }
 
-  pub fn command(self) -> Command {
+  pub fn command(self, tooling: Tooling) -> Command {
     let mut cmd = Command::new(self.cli());
 
     if self == Self::Deno {
-      cmd
-        .arg("add")
-        .arg("npm:@hiddenability/opinionated-defaults@latest")
-        .arg("npm:@types/node");
+      cmd.arg("add");
+      match tooling {
+        Tooling::Eslint => {
+          cmd
+            .arg("npm:@hiddenability/opinionated-defaults@latest")
+            .arg("npm:@types/node");
+        }
+        Tooling::Ox => {
+          cmd
+            .arg("npm:oxlint")
+            .arg("npm:oxlint-tsgolint")
+            .arg("npm:oxfmt")
+            .arg("npm:@types/node");
+        }
+      }
       return cmd;
     }
 
@@ -110,11 +127,16 @@ impl PackageManager {
       _ => ("add", "-D"),
     };
 
-    cmd
-      .arg(subcmd)
-      .arg("@hiddenability/opinionated-defaults@latest")
-      .arg("@types/node")
-      .arg(dev_flag);
+    cmd.arg(subcmd);
+    match tooling {
+      Tooling::Eslint => {
+        cmd.arg("@hiddenability/opinionated-defaults@latest");
+      }
+      Tooling::Ox => {
+        cmd.arg("oxlint").arg("oxlint-tsgolint").arg("oxfmt");
+      }
+    }
+    cmd.arg("@types/node").arg(dev_flag);
 
     if self == Self::BunOld {
       cmd.arg("--save-text-lockfile");
