@@ -1,7 +1,7 @@
 {
   "name": "@hiddenability/opinionated-defaults",
   "description": "Opinionated default configurations for webdev tools.",
-  "version": "0.1.49",
+  "version": "0.1.50",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -27,6 +27,18 @@
       "import": {
         "default": "./dist/prettier/index.mjs",
         "types": "./dist/prettier/index.d.ts"
+      }
+    },
+    "./oxlint": {
+      "import": {
+        "default": "./dist/oxlint/index.mjs",
+        "types": "./dist/oxlint/index.d.ts"
+      }
+    },
+    "./oxfmt": {
+      "import": {
+        "default": "./dist/oxfmt/index.mjs",
+        "types": "./dist/oxfmt/index.d.ts"
       }
     },
     "./oxlintrc": {

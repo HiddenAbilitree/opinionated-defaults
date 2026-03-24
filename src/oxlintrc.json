@@ -23,7 +23,8 @@
   },
   "ignorePatterns": ["**/dist/", "**/node_modules/", "**/.git/"],
   "options": {
-    "typeAware": true
+    "typeAware": true,
+    "typeCheck": true
   },
   "rules": {
     "typescript/no-misused-promises": ["error", { "checksVoidReturn": false }],

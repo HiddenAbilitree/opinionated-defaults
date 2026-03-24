@@ -1,7 +1,7 @@
 use {
   crate::{
     handle_dependencies::handle_dependencies,
-    types::{Dependencies, Packages, TSConfig},
+    types::{Dependencies, Packages, TSConfig, Tooling},
     utils::{find_file, find_files, find_tailwind_file},
   },
   anyhow::Result,
@@ -118,6 +118,24 @@ fn build_prettier_config(imports: &[String], tailwind_path: Option<&Path>) -> St
   out
 }
 
+fn strip_schema(json: &str) -> String {
+  let mut config: Value = from_str(json).expect("embedded JSON should be valid");
+  if let Some(obj) = config.as_object_mut() {
+    obj.remove("$schema");
+  }
+  to_string_pretty(&config).expect("serialization should succeed")
+}
+
+fn build_oxlint_config() -> String {
+  let config = strip_schema(include_str!("../../src/oxlintrc.json"));
+  format!("import {{ defineConfig }} from 'oxlint';\n\nexport default defineConfig({config});\n")
+}
+
+fn build_oxfmt_config() -> String {
+  let config = strip_schema(include_str!("../../src/oxfmtrc.json"));
+  format!("import {{ defineConfig }} from 'oxfmt';\n\nexport default defineConfig({config});\n")
+}
+
 fn find_default_project_tsconfig(tsconfig: &TSConfig) -> Option<&'static str> {
   const CANDIDATES: &[&str] = &["tsconfig.node.json", "tsconfig.eslint.json"];
 
@@ -130,7 +148,7 @@ fn find_default_project_tsconfig(tsconfig: &TSConfig) -> Option<&'static str> {
   })
 }
 
-pub fn generate_config(packages: Packages) -> Result<()> {
+fn generate_eslint_config(packages: Packages) -> Result<()> {
   let mut eslint_imports = handle_dependencies(Dependencies {
     packages: packages.clone(),
     valid_deps: vec![
@@ -261,29 +279,52 @@ pub fn generate_config(packages: Packages) -> Result<()> {
   write("eslint.config.ts", eslint_config)?;
   write("prettier.config.mjs", prettier_config)?;
 
-  update_scripts()?;
+  update_scripts(&[
+    ("lint", "eslint ."),
+    ("lint:fix", "eslint . --fix"),
+  ])?;
 
   Ok(())
 }
 
-fn update_scripts() -> Result<()> {
+fn generate_ox_config() -> Result<()> {
+  write("oxlint.config.ts", build_oxlint_config())?;
+  write("oxfmt.config.ts", build_oxfmt_config())?;
+
+  update_scripts(&[
+    ("lint", "oxlint"),
+    ("lint:fix", "oxlint --fix"),
+    ("format", "oxfmt ."),
+    ("format:check", "oxfmt --check ."),
+  ])?;
+
+  Ok(())
+}
+
+pub fn generate_config(packages: Packages, tooling: Tooling) -> Result<()> {
+  match tooling {
+    Tooling::Eslint => generate_eslint_config(packages),
+    Tooling::Ox => generate_ox_config(),
+  }
+}
+
+fn update_scripts(scripts: &[(&str, &str)]) -> Result<()> {
   let path = "package.json";
   if let Ok(contents) = read_to_string(path) {
     let mut v: Value = from_str(&contents)?;
 
-    if let Some(scripts) = v.get_mut("scripts") {
-      if let Some(map) = scripts.as_object_mut() {
-        map
-          .entry("lint")
-          .or_insert(Value::String("eslint .".into()));
-        map
-          .entry("lint:fix")
-          .or_insert(Value::String("eslint . --fix".into()));
+    if let Some(map) = v
+      .get_mut("scripts")
+      .and_then(|s| s.as_object_mut())
+    {
+      for &(key, value) in scripts {
+        map.insert(key.into(), Value::String(value.into()));
       }
     } else {
       let mut map = Map::new();
-      map.insert("lint".into(), Value::String("eslint .".into()));
-      map.insert("lint:fix".into(), Value::String("eslint . --fix".into()));
+      for &(key, value) in scripts {
+        map.insert(key.into(), Value::String(value.into()));
+      }
 
       if let Some(obj) = v.as_object_mut() {
         obj.insert("scripts".into(), Value::Object(map));
