@@ -21,7 +21,7 @@
     "browser": true,
     "node": true
   },
-  "ignorePatterns": ["**/dist/", "**/node_modules/", "**/.git/"],
+  "ignorePatterns": ["**/dist/", "**/node_modules/", "**/.git/", "**/*.gen.ts"],
   "options": {
     "typeAware": true,
     "typeCheck": true

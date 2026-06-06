@@ -8,6 +8,7 @@
   "tabWidth": 2,
   "trailingComma": "all",
   "useTabs": false,
+  "ignorePatterns": ["**/*.gen.ts"],
   "sortImports": {
     "newlinesBetween": true
   },

@@ -1,3 +1,4 @@
+import type { ESLint } from 'eslint';
 import type { ConfigArray } from 'typescript-eslint';
 
 import betterTailwindcss from 'eslint-plugin-better-tailwindcss';
@@ -6,7 +7,7 @@ import { defineConfig } from 'eslint/config';
 const betterTailwindcssConfig: ConfigArray = defineConfig([
   {
     plugins: {
-      'better-tailwindcss': betterTailwindcss,
+      'better-tailwindcss': betterTailwindcss as unknown as ESLint.Plugin,
     },
     rules: {
       ...betterTailwindcss.configs[`recommended-error`].rules,

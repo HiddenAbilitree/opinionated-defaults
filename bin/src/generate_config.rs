@@ -12,6 +12,7 @@ use {
     env::current_dir,
     fmt::Write,
     fs::{read_to_string, write},
+    io::ErrorKind,
     path::Path,
   },
 };
@@ -24,6 +25,8 @@ struct DefaultProjectConfig<'a> {
   files: &'a [&'a str],
   default_project: Option<&'a str>,
 }
+
+const GENERATED_TS_IGNORE_PATTERN: &str = "**/*.gen.ts";
 
 fn build_eslint_config(
   imports: &[String],
@@ -116,6 +119,29 @@ fn build_prettier_config(imports: &[String], tailwind_path: Option<&Path>) -> St
   writeln!(out, ");").unwrap();
 
   out
+}
+
+fn ensure_ignore_pattern(path: &str, pattern: &str) -> Result<()> {
+  let mut contents = match read_to_string(path) {
+    Ok(contents) => contents,
+    Err(error) if error.kind() == ErrorKind::NotFound => String::new(),
+    Err(error) => return Err(error.into()),
+  };
+
+  if contents.lines().any(|line| line.trim() == pattern) {
+    return Ok(());
+  }
+
+  if !contents.is_empty() && !contents.ends_with('\n') {
+    contents.push('\n');
+  }
+
+  contents.push_str(pattern);
+  contents.push('\n');
+
+  write(path, contents)?;
+
+  Ok(())
 }
 
 fn strip_schema(json: &str) -> String {
@@ -278,11 +304,9 @@ fn generate_eslint_config(packages: Packages) -> Result<()> {
 
   write("eslint.config.ts", eslint_config)?;
   write("prettier.config.mjs", prettier_config)?;
+  ensure_ignore_pattern(".gitignore", GENERATED_TS_IGNORE_PATTERN)?;
 
-  update_scripts(&[
-    ("lint", "eslint ."),
-    ("lint:fix", "eslint . --fix"),
-  ])?;
+  update_scripts(&[("lint", "eslint ."), ("lint:fix", "eslint . --fix")])?;
 
   Ok(())
 }
@@ -313,10 +337,7 @@ fn update_scripts(scripts: &[(&str, &str)]) -> Result<()> {
   if let Ok(contents) = read_to_string(path) {
     let mut v: Value = from_str(&contents)?;
 
-    if let Some(map) = v
-      .get_mut("scripts")
-      .and_then(|s| s.as_object_mut())
-    {
+    if let Some(map) = v.get_mut("scripts").and_then(|s| s.as_object_mut()) {
       for &(key, value) in scripts {
         map.insert(key.into(), Value::String(value.into()));
       }

@@ -46,3 +46,4 @@ test-projects/
 
 target
 seer
+**/*.gen.ts
