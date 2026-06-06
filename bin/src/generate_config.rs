@@ -5,7 +5,7 @@ use {
     utils::{find_file, find_files, find_tailwind_file},
   },
   anyhow::Result,
-  jsonc_parser::parse_to_serde_value,
+  jsonc_parser::{ParseOptions, parse_to_serde_value},
   pathdiff::diff_paths,
   serde_json::{Map, Value, from_str, from_value, to_string_pretty},
   std::{
@@ -13,7 +13,7 @@ use {
     fmt::Write,
     fs::{read_to_string, write},
     io::ErrorKind,
-    path::Path,
+    path::{Path, PathBuf},
   },
 };
 
@@ -21,9 +21,16 @@ fn dep(pkg: &str, import: &str) -> (String, String) {
   (pkg.into(), import.into())
 }
 
+#[derive(Clone, Copy)]
 struct DefaultProjectConfig<'a> {
   files: &'a [&'a str],
   default_project: Option<&'a str>,
+}
+
+struct TsconfigEslintConfig {
+  files: Vec<&'static str>,
+  project: Option<&'static str>,
+  uses_paths: bool,
 }
 
 const GENERATED_TS_IGNORE_PATTERN: &str = "**/*.gen.ts";
@@ -174,6 +181,113 @@ fn find_default_project_tsconfig(tsconfig: &TSConfig) -> Option<&'static str> {
   })
 }
 
+fn is_ts_include_pattern(pattern: &str) -> bool {
+  pattern == "."
+    || pattern == "*"
+    || pattern == "*.ts"
+    || pattern.contains("**/*.ts")
+    || pattern == "eslint.config.ts"
+}
+
+fn is_mjs_include_pattern(pattern: &str) -> bool {
+  pattern == "."
+    || pattern == "*"
+    || pattern == "*.mjs"
+    || pattern.contains("**/*.mjs")
+    || pattern == "prettier.config.mjs"
+}
+
+fn has_path_aliases(tsconfig: &TSConfig) -> bool {
+  tsconfig
+    .compiler_options
+    .as_ref()
+    .and_then(|opts| opts.paths.as_ref())
+    .is_some_and(|paths| !paths.is_empty())
+}
+
+fn included_by_tsconfig(tsconfig: &TSConfig, matches: fn(&str) -> bool) -> bool {
+  tsconfig
+    .include
+    .as_ref()
+    .is_none_or(|includes| includes.iter().any(|pattern| matches(pattern)))
+}
+
+fn includes_mjs(tsconfig: &TSConfig) -> bool {
+  let allow_js = tsconfig
+    .compiler_options
+    .as_ref()
+    .is_some_and(|opts| opts.allow_js);
+
+  (allow_js && tsconfig.include.is_none())
+    || tsconfig.include.as_ref().is_some_and(|includes| {
+      includes
+        .iter()
+        .any(|pattern| is_mjs_include_pattern(pattern))
+    })
+}
+
+fn build_tsconfig_eslint_config(tsconfig: &TSConfig) -> TsconfigEslintConfig {
+  let mut files = Vec::new();
+  let has_empty_files = tsconfig.files.as_ref().is_some_and(Vec::is_empty);
+  let includes_ts = included_by_tsconfig(tsconfig, is_ts_include_pattern);
+  let includes_mjs = includes_mjs(tsconfig);
+
+  if has_empty_files || !includes_ts {
+    files.push("eslint.config.ts");
+  }
+
+  if has_empty_files || !includes_mjs {
+    files.push("prettier.config.mjs");
+  }
+
+  if !includes_mjs && find_file("postcss.config.mjs").is_some() {
+    files.push("postcss.config.mjs");
+  }
+
+  TsconfigEslintConfig {
+    files,
+    project: find_default_project_tsconfig(tsconfig),
+    uses_paths: has_path_aliases(tsconfig),
+  }
+}
+
+fn read_tsconfig_eslint_config() -> Result<Option<TsconfigEslintConfig>> {
+  let Some(tsconfig_path) = find_file("tsconfig.json") else {
+    return Ok(None);
+  };
+
+  let contents = read_to_string(tsconfig_path)?;
+  let parsed = parse_to_serde_value(&contents, &ParseOptions::default())?
+    .and_then(|value| from_value::<TSConfig>(value).ok());
+
+  parsed.map_or_else(
+    || {
+      eprintln!("❌ Could not parse tsconfig.json. Skipping relative check...");
+      Ok(None)
+    },
+    |config| Ok(Some(build_tsconfig_eslint_config(&config))),
+  )
+}
+
+fn find_configured_tailwind_path(prettier_imports: &[String]) -> Option<PathBuf> {
+  if !prettier_imports
+    .iter()
+    .any(|s| s == "prettierConfigTailwind")
+  {
+    return None;
+  }
+
+  find_tailwind_file().map_or_else(
+    || {
+      eprintln!(
+        "⚠️ TailwindCSS dependency found but could not find a relevant css file. Skipping..."
+      );
+      None
+    },
+    Some,
+  )
+}
+
 fn generate_eslint_config(packages: Packages) -> Result<()> {
   let mut eslint_imports = handle_dependencies(Dependencies {
     packages: packages.clone(),
@@ -191,71 +305,18 @@ fn generate_eslint_config(packages: Packages) -> Result<()> {
     ],
   });
 
-  let mut default_project_files: Vec<&str> = Vec::new();
+  let mut default_project_files = Vec::new();
   let mut default_project_tsconfig: Option<&str> = None;
 
-  if let Some(tsconfig_path) = find_file("tsconfig.json") {
-    let contents = read_to_string(tsconfig_path)?;
-    let parsed = parse_to_serde_value(&contents, &Default::default())?
-      .and_then(|value| from_value::<TSConfig>(value).ok());
+  if let Some(config) = read_tsconfig_eslint_config()? {
+    if config.uses_paths {
+      eslint_imports.push("eslintConfigRelative".into());
+    }
+    default_project_tsconfig = config.project;
+    default_project_files = config.files;
 
-    if let Some(config) = parsed {
-      let has_paths = config
-        .compiler_options
-        .as_ref()
-        .and_then(|opts| opts.paths.as_ref())
-        .is_some_and(|paths| !paths.is_empty());
-
-      if has_paths {
-        eslint_imports.push("eslintConfigRelative".into());
-      }
-
-      default_project_tsconfig = find_default_project_tsconfig(&config);
-
-      let has_empty_files = config.files.as_ref().is_some_and(|f| f.is_empty());
-      let allow_js = config
-        .compiler_options
-        .as_ref()
-        .is_some_and(|opts| opts.allow_js);
-
-      let includes_ts = config.include.as_ref().is_none_or(|includes| {
-        includes.iter().any(|pattern| {
-          pattern == "."
-            || pattern == "*"
-            || pattern == "*.ts"
-            || pattern.contains("**/*.ts")
-            || pattern == "eslint.config.ts"
-        })
-      });
-
-      let includes_mjs = (allow_js && config.include.is_none())
-        || config.include.as_ref().is_some_and(|includes| {
-          includes.iter().any(|pattern| {
-            pattern == "."
-              || pattern == "*"
-              || pattern == "*.mjs"
-              || pattern.contains("**/*.mjs")
-              || pattern == "prettier.config.mjs"
-          })
-        });
-
-      if has_empty_files || !includes_ts {
-        default_project_files.push("eslint.config.ts");
-      }
-
-      if has_empty_files || !includes_mjs {
-        default_project_files.push("prettier.config.mjs");
-      }
-
-      if !includes_mjs && find_file("postcss.config.mjs").is_some() {
-        default_project_files.push("postcss.config.mjs");
-      }
-
-      if !default_project_files.is_empty() {
-        eslint_imports.push("eslintConfigDefaultProject".into());
-      }
-    } else {
-      eprintln!("❌ Could not parse tsconfig.json. Skipping relative check...");
+    if !default_project_files.is_empty() {
+      eslint_imports.push("eslintConfigDefaultProject".into());
     }
   }
 
@@ -266,7 +327,7 @@ fn generate_eslint_config(packages: Packages) -> Result<()> {
     .into_iter()
     .filter_map(|path| diff_paths(&path, &cwd))
     .collect();
-  let gitignore_refs: Vec<_> = gitignore_paths.iter().map(|p| p.as_path()).collect();
+  let gitignore_refs: Vec<_> = gitignore_paths.iter().map(PathBuf::as_path).collect();
 
   let eslint_config = build_eslint_config(
     &eslint_imports,
@@ -283,23 +344,7 @@ fn generate_eslint_config(packages: Packages) -> Result<()> {
     default_deps: vec!["prettierConfigBase".into()],
   });
 
-  let tailwind_path = if prettier_imports
-    .iter()
-    .any(|s| s == "prettierConfigTailwind")
-  {
-    match find_tailwind_file() {
-      Some(path) => Some(path),
-      None => {
-        eprintln!(
-          "⚠️ TailwindCSS dependency found but could not find a relevant css file. Skipping..."
-        );
-        None
-      }
-    }
-  } else {
-    None
-  };
-
+  let tailwind_path = find_configured_tailwind_path(&prettier_imports);
   let prettier_config = build_prettier_config(&prettier_imports, tailwind_path.as_deref());
 
   write("eslint.config.ts", eslint_config)?;

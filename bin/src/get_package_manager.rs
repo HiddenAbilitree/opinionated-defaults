@@ -15,13 +15,13 @@ pub fn get_package_manager_data() -> Option<ProjectData> {
   info!("Lockfile path: {}", path.display());
 
   let content = read_to_string(&path).ok()?;
-  let packages = manager
-    .parse_lockfile(&content)
-    .map(|data| data.packages)
-    .unwrap_or_else(|_| {
+  let packages = manager.parse_lockfile(&content).map_or_else(
+    |_| {
       eprintln!("❌ Could not parse the lockfile. Falling back to defaults...");
       Packages::new()
-    });
+    },
+    |data| data.packages,
+  );
 
   Some(ProjectData { packages, manager })
 }

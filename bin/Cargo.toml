@@ -23,6 +23,3 @@ features = ["derive"]
 [dependencies.jsonc-parser]
 version = "0.26"
 features = ["serde"]
-
-[dev-dependencies]
-clippy = "0.0.302"

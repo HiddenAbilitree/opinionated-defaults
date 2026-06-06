@@ -1,6 +1,6 @@
 use {
   anyhow::Result,
-  jsonc_parser::parse_to_serde_value,
+  jsonc_parser::{ParseOptions, parse_to_serde_value},
   serde::Deserialize,
   serde_json::{Map, Value, from_value},
   std::{ffi::OsStr, process::Command},
@@ -52,11 +52,11 @@ impl PackageManager {
     }
   }
 
-  pub fn parse_lockfile(&self, contents: &str) -> Result<JSONLockfile> {
+  pub fn parse_lockfile(self, contents: &str) -> Result<JSONLockfile> {
     match self {
       Self::Bun => {
         // bun.lock is jsonc and not json so we cannot use serde_json's parser
-        parse_to_serde_value(contents, &Default::default())?
+        parse_to_serde_value(contents, &ParseOptions::default())?
           .and_then(|value| from_value(value).ok())
           .ok_or_else(|| anyhow::anyhow!("failed to parse bun.lock"))
       }
@@ -147,7 +147,7 @@ impl PackageManager {
   }
 }
 
-/// serde_json map type `pub struct Map<K, V>`
+/// `serde_json` map type `pub struct Map<K, V>`
 /// represents a JSON key/value type
 pub type Packages = Map<String, Value>;
 

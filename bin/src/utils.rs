@@ -56,7 +56,7 @@ pub fn find_first_file(filenames: &[&str]) -> Option<PathBuf> {
 pub fn find_tailwind_file() -> Option<PathBuf> {
   let base_path = current_dir().ok()?;
   let tailwind_regex =
-    RegexSet::new([r#"@import ["']tailwindcss["'];"#, r#"@tailwind base;"#]).unwrap();
+    RegexSet::new([r#"@import ["']tailwindcss["'];"#, r"@tailwind base;"]).unwrap();
 
   Walk::new(&base_path)
     .filter_map(Result::ok)
