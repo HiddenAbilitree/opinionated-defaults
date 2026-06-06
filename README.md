@@ -85,6 +85,8 @@ bunx @hiddenability/opinionated-defaults -ox  # Oxlint + Oxfmt
 #### Exports:
 
 - oxlintConfig (Config object for `oxlint.config.ts`)
+- oxlintConfigReact (Base config with React and React performance rules)
+- oxlintConfigNext (React config with Next.js rules)
 
 #### Enabled plugins:
 
@@ -92,12 +94,12 @@ bunx @hiddenability/opinionated-defaults -ox  # Oxlint + Oxfmt
 - unicorn
 - oxc
 - import
-- react
-- react-perf
-- nextjs
 - promise
 - node
 - jsx-a11y
+
+The CLI-generated Oxlint config adds framework plugins from direct dependencies:
+React projects get `react` and `react-perf`; Next.js projects also get `nextjs`.
 
 ### Oxfmt (Prettier replacement):
 
@@ -153,6 +155,9 @@ import { oxlintConfig } from '@hiddenability/opinionated-defaults/oxlint';
 
 export default defineConfig(oxlintConfig);
 ```
+
+Use `oxlintConfigReact` for React projects or `oxlintConfigNext` for Next.js
+projects when configuring Oxlint manually.
 
 ### Oxfmt:
 

@@ -159,8 +159,46 @@ fn strip_schema(json: &str) -> String {
   to_string_pretty(&config).expect("serialization should succeed")
 }
 
-fn build_oxlint_config() -> String {
-  let config = strip_schema(include_str!(concat!(env!("OUT_DIR"), "/oxlintrc.json")));
+fn has_package(packages: &Packages, name: &str) -> bool {
+  packages.contains_key(name)
+}
+
+fn push_plugin(plugins: &mut Vec<Value>, plugin: &str) {
+  if plugins.iter().any(|value| value.as_str() == Some(plugin)) {
+    return;
+  }
+
+  plugins.push(Value::String(plugin.into()));
+}
+
+fn build_oxlint_config_value(packages: &Packages) -> Value {
+  let mut config: Value = from_str(include_str!(concat!(env!("OUT_DIR"), "/oxlintrc.json")))
+    .expect("embedded JSON should be valid");
+
+  if let Some(obj) = config.as_object_mut() {
+    obj.remove("$schema");
+
+    let has_next = has_package(packages, "next");
+    let has_react = has_next || has_package(packages, "react");
+
+    if let Some(plugins) = obj.get_mut("plugins").and_then(Value::as_array_mut) {
+      if has_react {
+        push_plugin(plugins, "react");
+        push_plugin(plugins, "react-perf");
+      }
+
+      if has_next {
+        push_plugin(plugins, "nextjs");
+      }
+    }
+  }
+
+  config
+}
+
+fn build_oxlint_config(packages: &Packages) -> String {
+  let config =
+    to_string_pretty(&build_oxlint_config_value(packages)).expect("serialization should succeed");
   format!("import {{ defineConfig }} from 'oxlint';\n\nexport default defineConfig({config});\n")
 }
 
@@ -356,8 +394,8 @@ fn generate_eslint_config(packages: Packages) -> Result<()> {
   Ok(())
 }
 
-fn generate_ox_config() -> Result<()> {
-  write("oxlint.config.ts", build_oxlint_config())?;
+fn generate_ox_config(packages: Packages) -> Result<()> {
+  write("oxlint.config.ts", build_oxlint_config(&packages))?;
   write("oxfmt.config.ts", build_oxfmt_config())?;
 
   update_scripts(&[
@@ -373,7 +411,70 @@ fn generate_ox_config() -> Result<()> {
 pub fn generate_config(packages: Packages, tooling: Tooling) -> Result<()> {
   match tooling {
     Tooling::Eslint => generate_eslint_config(packages),
-    Tooling::Ox => generate_ox_config(),
+    Tooling::Ox => generate_ox_config(packages),
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use {super::*, serde_json::Value};
+
+  fn packages(names: &[&str]) -> Packages {
+    names
+      .iter()
+      .map(|name| ((*name).into(), Value::String("latest".into())))
+      .collect()
+  }
+
+  fn plugin_names(config: &Value) -> Vec<&str> {
+    config
+      .get("plugins")
+      .and_then(Value::as_array)
+      .expect("plugins should be an array")
+      .iter()
+      .map(|plugin| plugin.as_str().expect("plugin names should be strings"))
+      .collect()
+  }
+
+  #[test]
+  fn oxlint_config_stays_framework_neutral_by_default() {
+    let config = build_oxlint_config_value(&packages(&[]));
+    let plugins = plugin_names(&config);
+
+    assert!(!plugins.contains(&"react"));
+    assert!(!plugins.contains(&"react-perf"));
+    assert!(!plugins.contains(&"nextjs"));
+  }
+
+  #[test]
+  fn tanstack_react_start_oxlint_config_gets_react_without_nextjs() {
+    let config =
+      build_oxlint_config_value(&packages(&["@tanstack/react-start", "react", "react-dom"]));
+    let plugins = plugin_names(&config);
+
+    assert!(plugins.contains(&"react"));
+    assert!(plugins.contains(&"react-perf"));
+    assert!(!plugins.contains(&"nextjs"));
+  }
+
+  #[test]
+  fn tanstack_solid_start_oxlint_config_gets_no_react_or_nextjs_plugins() {
+    let config = build_oxlint_config_value(&packages(&["@tanstack/solid-start", "solid-js"]));
+    let plugins = plugin_names(&config);
+
+    assert!(!plugins.contains(&"react"));
+    assert!(!plugins.contains(&"react-perf"));
+    assert!(!plugins.contains(&"nextjs"));
+  }
+
+  #[test]
+  fn next_projects_get_nextjs_and_react_oxlint_plugins() {
+    let config = build_oxlint_config_value(&packages(&["next"]));
+    let plugins = plugin_names(&config);
+
+    assert!(plugins.contains(&"react"));
+    assert!(plugins.contains(&"react-perf"));
+    assert!(plugins.contains(&"nextjs"));
   }
 }
 
