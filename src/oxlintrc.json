@@ -40,6 +40,7 @@
         "varsIgnorePattern": "^_"
       }
     ],
+    "react/react-in-jsx-scope": "off",
     "typescript/prefer-nullish-coalescing": "error",
     "unicorn/filename-case": ["error", { "cases": { "kebabCase": true } }],
     "unicorn/no-array-for-each": "off",
