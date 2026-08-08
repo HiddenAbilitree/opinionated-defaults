@@ -27,6 +27,8 @@ pub struct ProjectData {
   pub manager: PackageManager,
 }
 
+include!(concat!(env!("OUT_DIR"), "/eslint_prettier_dependencies.rs"));
+
 impl PackageManager {
   pub const ALL: [Self; 6] = [
     Self::Bun,
@@ -109,6 +111,9 @@ impl PackageManager {
           cmd
             .arg("npm:@hiddenability/opinionated-defaults@latest")
             .arg("npm:@types/node");
+          for dependency in ESLINT_PRETTIER_DEPENDENCIES {
+            cmd.arg(format!("npm:{dependency}"));
+          }
         }
         Tooling::Ox => {
           cmd
@@ -131,6 +136,9 @@ impl PackageManager {
     match tooling {
       Tooling::Eslint => {
         cmd.arg("@hiddenability/opinionated-defaults@latest");
+        for dependency in ESLINT_PRETTIER_DEPENDENCIES {
+          cmd.arg(*dependency);
+        }
       }
       Tooling::Ox => {
         cmd.arg("oxlint").arg("oxlint-tsgolint").arg("oxfmt");
@@ -195,4 +203,45 @@ pub struct Dependencies {
   pub packages: Map<String, Value>,
   pub valid_deps: Vec<(String, String)>,
   pub default_deps: Vec<String>,
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  fn args(manager: PackageManager, tooling: Tooling) -> Vec<String> {
+    manager
+      .command(tooling)
+      .get_args()
+      .map(|arg| arg.to_string_lossy().into_owned())
+      .collect()
+  }
+
+  #[test]
+  fn oxlint_install_does_not_include_eslint_dependencies() {
+    let args = args(PackageManager::Npm, Tooling::Ox);
+
+    assert!(
+      !args
+        .iter()
+        .any(|arg| arg == "@hiddenability/opinionated-defaults@latest")
+    );
+    for dependency in ESLINT_PRETTIER_DEPENDENCIES {
+      assert!(!args.iter().any(|arg| arg == dependency));
+    }
+  }
+
+  #[test]
+  fn eslint_install_includes_optional_dependencies() {
+    let args = args(PackageManager::Npm, Tooling::Eslint);
+
+    assert!(
+      args
+        .iter()
+        .any(|arg| arg == "@hiddenability/opinionated-defaults@latest")
+    );
+    for dependency in ESLINT_PRETTIER_DEPENDENCIES {
+      assert!(args.iter().any(|arg| arg == dependency));
+    }
+  }
 }

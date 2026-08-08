@@ -144,6 +144,11 @@ bun add @hiddenability/opinionated-defaults -d
 npm i @hiddenability/opinionated-defaults -D
 ```
 
+The ESLint and Prettier integrations are optional peers. The CLI installs them
+when ESLint + Prettier is selected; the Oxlint + Oxfmt path does not install
+them. Manual users should install the peer packages required by the configs
+they use.
+
 ## Usage:
 
 ### Oxlint:

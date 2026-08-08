@@ -22,8 +22,7 @@
     "noUnusedParameters": true,
     "noPropertyAccessFromIndexSignature": true,
     "outDir": "./dist",
-    "rootDir": "./",
-    "baseUrl": "./"
+    "rootDir": "./"
   },
   "exclude": ["node_modules", "dist"],
   "include": ["**/*.ts", "**/*.tsx", "**/*.mjs"]

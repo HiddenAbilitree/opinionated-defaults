@@ -120,6 +120,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   release-config:
+    needs: release-cli
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -143,7 +144,22 @@ jobs:
         run: bun link && bun ci
 
       - name: set version from tag
-        run: npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          export VERSION
+          npm version "$VERSION" --no-git-tag-version
+          node <<'NODE'
+          const fs = require('node:fs');
+          const version = process.env.VERSION;
+          const packagePath = 'package.json';
+          const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+
+          for (const name of Object.keys(packageJson.optionalDependencies ?? {})) {
+            packageJson.optionalDependencies[name] = version;
+          }
+
+          fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2) + '\n');
+          NODE
 
       - name: release new version
         run: npm publish --provenance --access public
