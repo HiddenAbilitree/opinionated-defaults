@@ -3,7 +3,7 @@ use {
   jsonc_parser::{ParseOptions, parse_to_serde_value},
   serde::Deserialize,
   serde_json::{Map, Value, from_value},
-  std::{ffi::OsStr, process::Command},
+  std::{ffi::OsStr, path::PathBuf, process::Command},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -25,6 +25,12 @@ pub enum PackageManager {
 pub struct ProjectData {
   pub packages: Packages,
   pub manager: PackageManager,
+}
+
+#[derive(Debug)]
+pub struct WorkspaceProject {
+  pub path: PathBuf,
+  pub packages: Packages,
 }
 
 include!(concat!(env!("OUT_DIR"), "/eslint_prettier_dependencies.rs"));
@@ -165,6 +171,21 @@ pub struct JSONLockfile {
 }
 
 #[derive(Deserialize)]
+#[serde(untagged)]
+pub enum Workspaces {
+  Patterns(Vec<String>),
+  Config { packages: Vec<String> },
+}
+
+impl Workspaces {
+  pub fn patterns(&self) -> &[String] {
+    match self {
+      Self::Patterns(patterns) | Self::Config { packages: patterns } => patterns,
+    }
+  }
+}
+
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PackageJSON {
   #[serde(default)]
@@ -173,6 +194,18 @@ pub struct PackageJSON {
   pub dev_dependencies: Packages,
   #[serde(default)]
   pub peer_dependencies: Packages,
+  pub workspaces: Option<Workspaces>,
+}
+
+impl PackageJSON {
+  pub fn into_packages(self) -> Packages {
+    self
+      .dependencies
+      .into_iter()
+      .chain(self.dev_dependencies)
+      .chain(self.peer_dependencies)
+      .collect()
+  }
 }
 
 #[derive(Deserialize)]

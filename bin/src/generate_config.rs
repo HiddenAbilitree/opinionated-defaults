@@ -1,17 +1,18 @@
 use {
   crate::{
+    get_package_manager::find_workspace_projects,
     handle_dependencies::handle_dependencies,
-    types::{Dependencies, Packages, TSConfig, Tooling},
+    types::{Dependencies, Packages, TSConfig, Tooling, WorkspaceProject},
     utils::{find_file, find_files, find_tailwind_file},
   },
-  anyhow::Result,
+  anyhow::{Context, Result},
   jsonc_parser::{ParseOptions, parse_to_serde_value},
   pathdiff::diff_paths,
-  serde_json::{Map, Value, from_str, from_value, to_string_pretty},
+  serde_json::{Map, Value, from_str, from_value, json, to_string_pretty},
   std::{
     env::current_dir,
     fmt::Write,
-    fs::{read_to_string, write},
+    fs::{read_to_string, remove_file, write},
     io::ErrorKind,
     path::{Path, PathBuf},
   },
@@ -151,14 +152,6 @@ fn ensure_ignore_pattern(path: &str, pattern: &str) -> Result<()> {
   Ok(())
 }
 
-fn strip_schema(json: &str) -> String {
-  let mut config: Value = from_str(json).expect("embedded JSON should be valid");
-  if let Some(obj) = config.as_object_mut() {
-    obj.remove("$schema");
-  }
-  to_string_pretty(&config).expect("serialization should succeed")
-}
-
 fn has_package(packages: &Packages, name: &str) -> bool {
   packages.contains_key(name)
 }
@@ -171,6 +164,73 @@ fn push_plugin(plugins: &mut Vec<Value>, plugin: &str) {
   plugins.push(Value::String(plugin.into()));
 }
 
+fn add_framework_plugins(plugins: &mut Vec<Value>, packages: &Packages) {
+  let has_next = has_package(packages, "next");
+  let has_react = has_next || has_package(packages, "react");
+
+  if has_react {
+    push_plugin(plugins, "react");
+    push_plugin(plugins, "react-perf");
+  }
+
+  if has_next {
+    push_plugin(plugins, "nextjs");
+  }
+}
+
+const REACT_CORRECTNESS_RULES: &[&str] = &[
+  "exhaustive-deps",
+  "forward-ref-uses-ref",
+  "jsx-key",
+  "jsx-no-duplicate-props",
+  "jsx-no-undef",
+  "jsx-props-no-spread-multi",
+  "no-children-prop",
+  "no-danger-with-children",
+  "no-did-mount-set-state",
+  "no-did-update-set-state",
+  "no-direct-mutation-state",
+  "no-find-dom-node",
+  "no-is-mounted",
+  "no-render-return-value",
+  "no-string-refs",
+  "no-this-in-sfc",
+  "no-unsafe",
+  "no-will-update-set-state",
+  "void-dom-elements-no-children",
+];
+const REACT_SUSPICIOUS_RULES: &[&str] = &[
+  "iframe-missing-sandbox",
+  "jsx-no-comment-textnodes",
+  "jsx-no-script-url",
+  "no-namespace",
+  "no-unstable-nested-components",
+  "style-prop-object",
+];
+const NEXT_CORRECTNESS_RULES: &[&str] = &[
+  "google-font-display",
+  "google-font-preconnect",
+  "inline-script-id",
+  "next-script-for-ga",
+  "no-assign-module-variable",
+  "no-async-client-component",
+  "no-before-interactive-script-outside-document",
+  "no-css-tags",
+  "no-document-import-in-page",
+  "no-duplicate-head",
+  "no-head-element",
+  "no-head-import-in-document",
+  "no-html-link-for-pages",
+  "no-img-element",
+  "no-page-custom-font",
+  "no-script-component-in-head",
+  "no-styled-jsx-in-document",
+  "no-sync-scripts",
+  "no-title-in-document-head",
+  "no-typos",
+  "no-unwanted-polyfillio",
+];
+
 fn build_oxlint_config_value(packages: &Packages) -> Value {
   let mut config: Value = from_str(include_str!(concat!(env!("OUT_DIR"), "/oxlintrc.json")))
     .expect("embedded JSON should be valid");
@@ -178,32 +238,164 @@ fn build_oxlint_config_value(packages: &Packages) -> Value {
   if let Some(obj) = config.as_object_mut() {
     obj.remove("$schema");
 
-    let has_next = has_package(packages, "next");
-    let has_react = has_next || has_package(packages, "react");
-
     if let Some(plugins) = obj.get_mut("plugins").and_then(Value::as_array_mut) {
-      if has_react {
-        push_plugin(plugins, "react");
-        push_plugin(plugins, "react-perf");
-      }
-
-      if has_next {
-        push_plugin(plugins, "nextjs");
-      }
+      add_framework_plugins(plugins, packages);
     }
   }
 
   config
 }
 
-fn build_oxlint_config(packages: &Packages) -> String {
-  let config =
-    to_string_pretty(&build_oxlint_config_value(packages)).expect("serialization should succeed");
+fn project_path(project: &WorkspaceProject) -> String {
+  project.path.to_string_lossy().replace('\\', "/")
+}
+
+fn project_glob(project: &WorkspaceProject) -> String {
+  format!("{}/**/*", project_path(project))
+}
+
+fn insert_plugin_rules(
+  rules: &mut Map<String, Value>,
+  plugin: &str,
+  names: &[&str],
+  severity: &Value,
+) {
+  if severity.as_str() == Some("off") || severity.as_u64() == Some(0) {
+    return;
+  }
+
+  for name in names {
+    rules.insert(format!("{plugin}/{name}"), severity.clone());
+  }
+}
+
+fn build_framework_rules(
+  packages: &Packages,
+  correctness: &Value,
+  suspicious: &Value,
+) -> Map<String, Value> {
+  let mut rules = Map::new();
+  let has_next = has_package(packages, "next");
+  if has_next || has_package(packages, "react") {
+    insert_plugin_rules(&mut rules, "react", REACT_CORRECTNESS_RULES, correctness);
+    insert_plugin_rules(&mut rules, "react", REACT_SUSPICIOUS_RULES, suspicious);
+  }
+  if has_next {
+    insert_plugin_rules(&mut rules, "nextjs", NEXT_CORRECTNESS_RULES, correctness);
+  }
+  rules
+}
+
+fn build_monorepo_oxlint_config_value(packages: &Packages, projects: &[WorkspaceProject]) -> Value {
+  if projects.is_empty() {
+    return build_oxlint_config_value(packages);
+  }
+
+  // Oxlint categories are root-only. Keep the root framework-neutral, then
+  // mirror category-enabled framework rules into each matching override.
+  let mut config = build_oxlint_config_value(&Packages::new());
+  let correctness = config
+    .pointer("/categories/correctness")
+    .cloned()
+    .unwrap_or_else(|| Value::String("off".into()));
+  let suspicious = config
+    .pointer("/categories/suspicious")
+    .cloned()
+    .unwrap_or_else(|| Value::String("off".into()));
+  let overrides = projects
+    .iter()
+    .map(|project| {
+      let plugins = build_oxlint_config_value(&project.packages)
+        .get("plugins")
+        .cloned()
+        .expect("embedded Oxlint config should contain plugins");
+      let rules = build_framework_rules(&project.packages, &correctness, &suspicious);
+      let mut override_config = json!({
+        "files": [project_glob(project)],
+        "plugins": plugins,
+      });
+      if !rules.is_empty() {
+        override_config
+          .as_object_mut()
+          .expect("Oxlint override should be an object")
+          .insert("rules".into(), Value::Object(rules));
+      }
+      override_config
+    })
+    .collect();
+  let next_roots: Vec<_> = projects
+    .iter()
+    .filter(|project| has_package(&project.packages, "next"))
+    .map(|project| Value::String(format!("{}/", project_path(project))))
+    .collect();
+
+  if let Some(obj) = config.as_object_mut() {
+    obj.insert("overrides".into(), Value::Array(overrides));
+
+    if !next_roots.is_empty() {
+      let settings = obj
+        .entry("settings")
+        .or_insert_with(|| Value::Object(Map::new()))
+        .as_object_mut()
+        .expect("Oxlint settings should be an object");
+      let next = settings
+        .entry("next")
+        .or_insert_with(|| Value::Object(Map::new()))
+        .as_object_mut()
+        .expect("Oxlint Next.js settings should be an object");
+      next.insert("rootDir".into(), Value::Array(next_roots));
+    }
+  }
+
+  config
+}
+
+fn build_oxlint_config(packages: &Packages, projects: &[WorkspaceProject]) -> String {
+  let config = to_string_pretty(&build_monorepo_oxlint_config_value(packages, projects))
+    .expect("serialization should succeed");
   format!("import {{ defineConfig }} from 'oxlint';\n\nexport default defineConfig({config});\n")
 }
 
-fn build_oxfmt_config() -> String {
-  let config = strip_schema(include_str!(concat!(env!("OUT_DIR"), "/oxfmtrc.json")));
+fn build_oxfmt_config_value() -> Value {
+  let mut config: Value = from_str(include_str!(concat!(env!("OUT_DIR"), "/oxfmtrc.json")))
+    .expect("embedded JSON should be valid");
+  if let Some(obj) = config.as_object_mut() {
+    obj.remove("$schema");
+  }
+  config
+}
+
+fn build_monorepo_oxfmt_config_value(projects: &[WorkspaceProject]) -> Value {
+  let mut config = build_oxfmt_config_value();
+  if projects.is_empty() {
+    return config;
+  }
+
+  let mut project_options = config.clone();
+  if let Some(options) = project_options.as_object_mut() {
+    options.remove("ignorePatterns");
+    options.remove("overrides");
+  }
+  let overrides = projects
+    .iter()
+    .map(|project| {
+      json!({
+        "files": [project_glob(project)],
+        "options": project_options,
+      })
+    })
+    .collect();
+
+  config
+    .as_object_mut()
+    .expect("embedded Oxfmt config should be an object")
+    .insert("overrides".into(), Value::Array(overrides));
+  config
+}
+
+fn build_oxfmt_config(projects: &[WorkspaceProject]) -> String {
+  let config = to_string_pretty(&build_monorepo_oxfmt_config_value(projects))
+    .expect("serialization should succeed");
   format!("import {{ defineConfig }} from 'oxfmt';\n\nexport default defineConfig({config});\n")
 }
 
@@ -326,6 +518,32 @@ fn find_configured_tailwind_path(prettier_imports: &[String]) -> Option<PathBuf>
   )
 }
 
+fn update_scripts(scripts: &[(&str, &str)]) -> Result<()> {
+  let path = "package.json";
+  if let Ok(contents) = read_to_string(path) {
+    let mut v: Value = from_str(&contents)?;
+
+    if let Some(map) = v.get_mut("scripts").and_then(|s| s.as_object_mut()) {
+      for &(key, value) in scripts {
+        map.insert(key.into(), Value::String(value.into()));
+      }
+    } else {
+      let mut map = Map::new();
+      for &(key, value) in scripts {
+        map.insert(key.into(), Value::String(value.into()));
+      }
+
+      if let Some(obj) = v.as_object_mut() {
+        obj.insert("scripts".into(), Value::Object(map));
+      }
+    }
+
+    let new_contents = to_string_pretty(&v)? + "\n";
+    write(path, new_contents)?;
+  }
+  Ok(())
+}
+
 fn generate_eslint_config(packages: Packages) -> Result<()> {
   let mut eslint_imports = handle_dependencies(Dependencies {
     packages: packages.clone(),
@@ -394,9 +612,40 @@ fn generate_eslint_config(packages: Packages) -> Result<()> {
   Ok(())
 }
 
+const CHILD_OX_CONFIG_FILENAMES: &[&str] = &[
+  "oxlint.config.ts",
+  ".oxlintrc.json",
+  ".oxlintrc.jsonc",
+  "oxfmt.config.ts",
+  ".oxfmtrc.json",
+  ".oxfmtrc.jsonc",
+];
+
+fn remove_child_ox_configs(root: &Path, projects: &[WorkspaceProject]) -> Result<()> {
+  for project in projects {
+    for filename in CHILD_OX_CONFIG_FILENAMES {
+      let path = root.join(&project.path).join(filename);
+      if let Err(error) = remove_file(&path)
+        && error.kind() != ErrorKind::NotFound
+      {
+        return Err(error).with_context(|| format!("could not remove {}", path.display()));
+      }
+    }
+  }
+
+  Ok(())
+}
+
 fn generate_ox_config(packages: Packages) -> Result<()> {
-  write("oxlint.config.ts", build_oxlint_config(&packages))?;
-  write("oxfmt.config.ts", build_oxfmt_config())?;
+  let root = current_dir()?;
+  let projects = find_workspace_projects(&root)?;
+
+  write(
+    root.join("oxlint.config.ts"),
+    build_oxlint_config(&packages, &projects),
+  )?;
+  write(root.join("oxfmt.config.ts"), build_oxfmt_config(&projects))?;
+  remove_child_ox_configs(&root, &projects)?;
 
   update_scripts(&[
     ("lint", "oxlint"),
@@ -434,6 +683,28 @@ mod tests {
       .iter()
       .map(|plugin| plugin.as_str().expect("plugin names should be strings"))
       .collect()
+  }
+
+  fn workspace_project(path: &str, package_names: &[&str]) -> WorkspaceProject {
+    WorkspaceProject {
+      path: PathBuf::from(path),
+      packages: packages(package_names),
+    }
+  }
+
+  fn override_for<'a>(config: &'a Value, glob: &str) -> &'a Value {
+    config
+      .get("overrides")
+      .and_then(Value::as_array)
+      .expect("overrides should be an array")
+      .iter()
+      .find(|override_config| {
+        override_config
+          .get("files")
+          .and_then(Value::as_array)
+          .is_some_and(|files| files.first().and_then(Value::as_str) == Some(glob))
+      })
+      .expect("project override should exist")
   }
 
   #[test]
@@ -476,30 +747,63 @@ mod tests {
     assert!(plugins.contains(&"react-perf"));
     assert!(plugins.contains(&"nextjs"));
   }
-}
 
-fn update_scripts(scripts: &[(&str, &str)]) -> Result<()> {
-  let path = "package.json";
-  if let Ok(contents) = read_to_string(path) {
-    let mut v: Value = from_str(&contents)?;
+  #[test]
+  fn monorepo_oxlint_overrides_scope_plugins_by_project_type() {
+    let projects = [
+      workspace_project("apps/api", &["elysia"]),
+      workspace_project("apps/nexus", &["next", "react"]),
+      workspace_project("packages/db", &["drizzle-orm"]),
+    ];
 
-    if let Some(map) = v.get_mut("scripts").and_then(|s| s.as_object_mut()) {
-      for &(key, value) in scripts {
-        map.insert(key.into(), Value::String(value.into()));
-      }
-    } else {
-      let mut map = Map::new();
-      for &(key, value) in scripts {
-        map.insert(key.into(), Value::String(value.into()));
-      }
+    let config = build_monorepo_oxlint_config_value(&packages(&["turbo"]), &projects);
+    let api_override = override_for(&config, "apps/api/**/*");
+    let next_override = override_for(&config, "apps/nexus/**/*");
+    let api_plugins = plugin_names(api_override);
+    let next_plugins = plugin_names(next_override);
 
-      if let Some(obj) = v.as_object_mut() {
-        obj.insert("scripts".into(), Value::Object(map));
-      }
-    }
-
-    let new_contents = to_string_pretty(&v)? + "\n";
-    write(path, new_contents)?;
+    assert!(api_plugins.contains(&"node"));
+    assert!(!api_plugins.contains(&"react"));
+    assert!(!api_plugins.contains(&"nextjs"));
+    assert!(api_override.get("rules").is_none());
+    assert!(next_plugins.contains(&"react"));
+    assert!(next_plugins.contains(&"react-perf"));
+    assert!(next_plugins.contains(&"nextjs"));
+    assert_eq!(
+      next_override
+        .get("rules")
+        .and_then(|rules| rules.get("nextjs/no-img-element")),
+      Some(&json!("error"))
+    );
+    assert_eq!(
+      next_override
+        .get("rules")
+        .and_then(|rules| rules.get("react/no-unstable-nested-components")),
+      Some(&json!("warn"))
+    );
+    assert_eq!(
+      config
+        .pointer("/settings/next/rootDir")
+        .expect("Next.js root directories should be configured"),
+      &json!(["apps/nexus/"])
+    );
   }
-  Ok(())
+
+  #[test]
+  fn monorepo_oxfmt_config_has_an_override_for_every_project() {
+    let projects = [
+      workspace_project("apps/api", &["elysia"]),
+      workspace_project("apps/nexus", &["next"]),
+    ];
+
+    let config = build_monorepo_oxfmt_config_value(&projects);
+    for glob in ["apps/api/**/*", "apps/nexus/**/*"] {
+      let options = override_for(&config, glob)
+        .get("options")
+        .expect("project override should contain format options");
+      assert!(options.get("sortImports").is_some());
+      assert!(options.get("sortTailwindcss").is_some());
+      assert!(options.get("ignorePatterns").is_none());
+    }
+  }
 }

@@ -64,9 +64,8 @@ fn generate_eslint_prettier_dependencies(manifest_dir: &str, out_dir: &str) {
   generated.push_str("];\n");
 
   let output_path = PathBuf::from(out_dir).join("eslint_prettier_dependencies.rs");
-  write(&output_path, generated).unwrap_or_else(|error| {
-    panic!("could not write {}: {error}", output_path.display())
-  });
+  write(&output_path, generated)
+    .unwrap_or_else(|error| panic!("could not write {}: {error}", output_path.display()));
 
   println!("cargo:rerun-if-changed={}", package_path.display());
 }

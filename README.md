@@ -98,8 +98,16 @@ bunx @hiddenability/opinionated-defaults -ox  # Oxlint + Oxfmt
 - node
 - jsx-a11y
 
-The CLI-generated Oxlint config adds framework plugins from direct dependencies:
-React projects get `react` and `react-perf`; Next.js projects also get `nextjs`.
+The CLI-generated Oxlint config adds framework plugins and rules from direct
+dependencies: React projects get `react` and `react-perf`; Next.js projects also
+get `nextjs`.
+
+In a workspace monorepo, the CLI reads each child `package.json` and writes one
+root `oxlint.config.ts` and one root `oxfmt.config.ts`, with an override for
+every child project. Framework detection uses package manifests only. Existing
+child Oxlint and Oxfmt configs are removed so nested config lookup cannot shadow
+the generated root configs. Both `package.json` workspaces and
+`pnpm-workspace.yaml` are supported.
 
 ### Oxfmt (Prettier replacement):
 
