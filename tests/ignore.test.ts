@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { getFileInfo } from 'prettier';
 
 import eslintConfigBase from '../src/eslint/base';
-import { oxfmtConfig } from '../src/oxfmt';
-import { oxlintConfig } from '../src/oxlint';
+import { oxfmtConfigBase } from '../src/oxfmt';
+import { oxlintConfigBase } from '../src/oxlint';
 
 const GENERATED_TS_PATTERN = `**/*.gen.ts`;
 
@@ -40,6 +40,6 @@ test(`prettier ignores generated TypeScript files`, async () => {
 });
 
 test(`oxtools ignore generated TypeScript files`, () => {
-  expect(oxlintConfig.ignorePatterns).toContain(GENERATED_TS_PATTERN);
-  expect(oxfmtConfig.ignorePatterns).toContain(GENERATED_TS_PATTERN);
+  expect(oxlintConfigBase.ignorePatterns).toContain(GENERATED_TS_PATTERN);
+  expect(oxfmtConfigBase.ignorePatterns).toContain(GENERATED_TS_PATTERN);
 });

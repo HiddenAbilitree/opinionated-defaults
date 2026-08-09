@@ -3,6 +3,13 @@ name = "bin"
 version = "0.1.0"
 edition = "2024"
 
+[profile.release]
+opt-level = 2
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+
 [dependencies]
 serde_json = { version = "1.0.141", features = ["preserve_order"] }
 grep = "0.3.2"

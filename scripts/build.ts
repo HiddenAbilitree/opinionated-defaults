@@ -61,9 +61,6 @@ await build({
   target: `node`,
 });
 
-await write(`./dist/oxlintrc.json`, file(`./src/oxlintrc.json`));
-await write(`./dist/oxfmtrc.json`, file(`./src/oxfmtrc.json`));
-
 performance.mark(`build_end`);
 
 consola.success(

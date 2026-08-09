@@ -1,6 +1,7 @@
 mod generate_config;
 mod get_package_manager;
 mod handle_dependencies;
+mod monorepo;
 mod types;
 mod utils;
 
@@ -57,10 +58,10 @@ fn get_tooling() -> Result<Tooling> {
 }
 
 fn main() -> Result<()> {
-  let start = Instant::now();
   env_logger::init();
 
   let tooling = get_tooling()?;
+  let start = Instant::now();
 
   let mut project = get_package_manager_data().unwrap_or_else(default_project);
 

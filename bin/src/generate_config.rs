@@ -1,6 +1,9 @@
 use {
   crate::{
     handle_dependencies::handle_dependencies,
+    monorepo::{
+      build_oxfmt_config, build_oxlint_config, find_workspace_projects, remove_child_ox_configs,
+    },
     types::{Dependencies, Packages, TSConfig, Tooling},
     utils::{find_file, find_files, find_tailwind_file},
   },
@@ -151,62 +154,6 @@ fn ensure_ignore_pattern(path: &str, pattern: &str) -> Result<()> {
   Ok(())
 }
 
-fn strip_schema(json: &str) -> String {
-  let mut config: Value = from_str(json).expect("embedded JSON should be valid");
-  if let Some(obj) = config.as_object_mut() {
-    obj.remove("$schema");
-  }
-  to_string_pretty(&config).expect("serialization should succeed")
-}
-
-fn has_package(packages: &Packages, name: &str) -> bool {
-  packages.contains_key(name)
-}
-
-fn push_plugin(plugins: &mut Vec<Value>, plugin: &str) {
-  if plugins.iter().any(|value| value.as_str() == Some(plugin)) {
-    return;
-  }
-
-  plugins.push(Value::String(plugin.into()));
-}
-
-fn build_oxlint_config_value(packages: &Packages) -> Value {
-  let mut config: Value = from_str(include_str!(concat!(env!("OUT_DIR"), "/oxlintrc.json")))
-    .expect("embedded JSON should be valid");
-
-  if let Some(obj) = config.as_object_mut() {
-    obj.remove("$schema");
-
-    let has_next = has_package(packages, "next");
-    let has_react = has_next || has_package(packages, "react");
-
-    if let Some(plugins) = obj.get_mut("plugins").and_then(Value::as_array_mut) {
-      if has_react {
-        push_plugin(plugins, "react");
-        push_plugin(plugins, "react-perf");
-      }
-
-      if has_next {
-        push_plugin(plugins, "nextjs");
-      }
-    }
-  }
-
-  config
-}
-
-fn build_oxlint_config(packages: &Packages) -> String {
-  let config =
-    to_string_pretty(&build_oxlint_config_value(packages)).expect("serialization should succeed");
-  format!("import {{ defineConfig }} from 'oxlint';\n\nexport default defineConfig({config});\n")
-}
-
-fn build_oxfmt_config() -> String {
-  let config = strip_schema(include_str!(concat!(env!("OUT_DIR"), "/oxfmtrc.json")));
-  format!("import {{ defineConfig }} from 'oxfmt';\n\nexport default defineConfig({config});\n")
-}
-
 fn find_default_project_tsconfig(tsconfig: &TSConfig) -> Option<&'static str> {
   const CANDIDATES: &[&str] = &["tsconfig.node.json", "tsconfig.eslint.json"];
 
@@ -326,6 +273,32 @@ fn find_configured_tailwind_path(prettier_imports: &[String]) -> Option<PathBuf>
   )
 }
 
+fn update_scripts(scripts: &[(&str, &str)]) -> Result<()> {
+  let path = "package.json";
+  if let Ok(contents) = read_to_string(path) {
+    let mut v: Value = from_str(&contents)?;
+
+    if let Some(map) = v.get_mut("scripts").and_then(|s| s.as_object_mut()) {
+      for &(key, value) in scripts {
+        map.insert(key.into(), Value::String(value.into()));
+      }
+    } else {
+      let mut map = Map::new();
+      for &(key, value) in scripts {
+        map.insert(key.into(), Value::String(value.into()));
+      }
+
+      if let Some(obj) = v.as_object_mut() {
+        obj.insert("scripts".into(), Value::Object(map));
+      }
+    }
+
+    let new_contents = to_string_pretty(&v)? + "\n";
+    write(path, new_contents)?;
+  }
+  Ok(())
+}
+
 fn generate_eslint_config(packages: Packages) -> Result<()> {
   let mut eslint_imports = handle_dependencies(Dependencies {
     packages: packages.clone(),
@@ -394,9 +367,19 @@ fn generate_eslint_config(packages: Packages) -> Result<()> {
   Ok(())
 }
 
-fn generate_ox_config(packages: Packages) -> Result<()> {
-  write("oxlint.config.ts", build_oxlint_config(&packages))?;
-  write("oxfmt.config.ts", build_oxfmt_config())?;
+fn generate_ox_config(packages: &Packages) -> Result<()> {
+  let root = current_dir()?;
+  let projects = find_workspace_projects(&root)?;
+
+  write(
+    root.join("oxlint.config.ts"),
+    build_oxlint_config(packages, &projects),
+  )?;
+  write(
+    root.join("oxfmt.config.ts"),
+    build_oxfmt_config(packages, &projects),
+  )?;
+  remove_child_ox_configs(&root, &projects)?;
 
   update_scripts(&[
     ("lint", "oxlint"),
@@ -411,95 +394,6 @@ fn generate_ox_config(packages: Packages) -> Result<()> {
 pub fn generate_config(packages: Packages, tooling: Tooling) -> Result<()> {
   match tooling {
     Tooling::Eslint => generate_eslint_config(packages),
-    Tooling::Ox => generate_ox_config(packages),
+    Tooling::Ox => generate_ox_config(&packages),
   }
-}
-
-#[cfg(test)]
-mod tests {
-  use {super::*, serde_json::Value};
-
-  fn packages(names: &[&str]) -> Packages {
-    names
-      .iter()
-      .map(|name| ((*name).into(), Value::String("latest".into())))
-      .collect()
-  }
-
-  fn plugin_names(config: &Value) -> Vec<&str> {
-    config
-      .get("plugins")
-      .and_then(Value::as_array)
-      .expect("plugins should be an array")
-      .iter()
-      .map(|plugin| plugin.as_str().expect("plugin names should be strings"))
-      .collect()
-  }
-
-  #[test]
-  fn oxlint_config_stays_framework_neutral_by_default() {
-    let config = build_oxlint_config_value(&packages(&[]));
-    let plugins = plugin_names(&config);
-
-    assert!(!plugins.contains(&"react"));
-    assert!(!plugins.contains(&"react-perf"));
-    assert!(!plugins.contains(&"nextjs"));
-  }
-
-  #[test]
-  fn tanstack_react_start_oxlint_config_gets_react_without_nextjs() {
-    let config =
-      build_oxlint_config_value(&packages(&["@tanstack/react-start", "react", "react-dom"]));
-    let plugins = plugin_names(&config);
-
-    assert!(plugins.contains(&"react"));
-    assert!(plugins.contains(&"react-perf"));
-    assert!(!plugins.contains(&"nextjs"));
-  }
-
-  #[test]
-  fn tanstack_solid_start_oxlint_config_gets_no_react_or_nextjs_plugins() {
-    let config = build_oxlint_config_value(&packages(&["@tanstack/solid-start", "solid-js"]));
-    let plugins = plugin_names(&config);
-
-    assert!(!plugins.contains(&"react"));
-    assert!(!plugins.contains(&"react-perf"));
-    assert!(!plugins.contains(&"nextjs"));
-  }
-
-  #[test]
-  fn next_projects_get_nextjs_and_react_oxlint_plugins() {
-    let config = build_oxlint_config_value(&packages(&["next"]));
-    let plugins = plugin_names(&config);
-
-    assert!(plugins.contains(&"react"));
-    assert!(plugins.contains(&"react-perf"));
-    assert!(plugins.contains(&"nextjs"));
-  }
-}
-
-fn update_scripts(scripts: &[(&str, &str)]) -> Result<()> {
-  let path = "package.json";
-  if let Ok(contents) = read_to_string(path) {
-    let mut v: Value = from_str(&contents)?;
-
-    if let Some(map) = v.get_mut("scripts").and_then(|s| s.as_object_mut()) {
-      for &(key, value) in scripts {
-        map.insert(key.into(), Value::String(value.into()));
-      }
-    } else {
-      let mut map = Map::new();
-      for &(key, value) in scripts {
-        map.insert(key.into(), Value::String(value.into()));
-      }
-
-      if let Some(obj) = v.as_object_mut() {
-        obj.insert("scripts".into(), Value::Object(map));
-      }
-    }
-
-    let new_contents = to_string_pretty(&v)? + "\n";
-    write(path, new_contents)?;
-  }
-  Ok(())
 }

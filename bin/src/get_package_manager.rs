@@ -12,14 +12,7 @@ fn read_package_json_packages() -> Option<Packages> {
   let content = read_to_string(&path).ok()?;
   let data: PackageJSON = serde_json::from_str(&content).ok()?;
 
-  Some(
-    data
-      .dependencies
-      .into_iter()
-      .chain(data.dev_dependencies)
-      .chain(data.peer_dependencies)
-      .collect(),
-  )
+  Some(data.into_packages())
 }
 
 pub fn get_package_manager_data() -> Option<ProjectData> {
