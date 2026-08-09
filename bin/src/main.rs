@@ -1,6 +1,7 @@
 mod generate_config;
 mod get_package_manager;
 mod handle_dependencies;
+mod monorepo;
 mod types;
 mod utils;
 

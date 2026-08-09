@@ -6,7 +6,6 @@
 
 A collection of opinionated web-dev tooling configurations.
 
-
 ![GitHub Tag](https://img.shields.io/github/v/tag/hiddenabilitree/opinionated-defaults?style=for-the-badge)
 ![NPM Downloads](https://img.shields.io/npm/d18m/%40hiddenability%2Fopinionated-defaults?style=for-the-badge)
 ![GitHub License](https://img.shields.io/github/license/hiddenabilitree/opinionated-defaults?style=for-the-badge)
@@ -22,7 +21,7 @@ A collection of opinionated web-dev tooling configurations.
 
 > [!NOTE]
 > The package manager that the CLI will use to install this package is dependent on what lockfile you have in the root of your project (i.e., having bun.lock will use bun, while having package-lock.json will use npm).
-> 
+>
 > **Currently, the only supported package managers are bun and npm**.
 
 This package contains a CLI that generates config files for your project. It will prompt you to choose between ESLint + Prettier or Oxlint + Oxfmt.
@@ -84,9 +83,13 @@ bunx @hiddenability/opinionated-defaults -ox  # Oxlint + Oxfmt
 
 #### Exports:
 
-- oxlintConfig (Config object for `oxlint.config.ts`)
-- oxlintConfigReact (Base config with React and React performance rules)
-- oxlintConfigNext (React config with Next.js rules)
+- oxlintConfig (Merges typed Oxlint config modules)
+- oxlintIgnorePatterns (Combines generated-file ignores from config modules)
+- oxlintOverride (Scopes config-module differences to workspace projects)
+- oxlintConfigBase (General rules for every project)
+- oxlintConfigReact (React and React performance project differences)
+- oxlintConfigNext (Next.js project differences)
+- oxlintConfigTanstackStart (TanStack Start generated-file ignores)
 
 #### Enabled plugins:
 
@@ -98,14 +101,14 @@ bunx @hiddenability/opinionated-defaults -ox  # Oxlint + Oxfmt
 - node
 - jsx-a11y
 
-The CLI-generated Oxlint config adds framework plugins from direct dependencies:
-React projects get `react` and `react-perf`; Next.js projects also get `nextjs`.
-
 ### Oxfmt (Prettier replacement):
 
 #### Exports:
 
-- oxfmtConfig (Config object for `oxfmt.config.ts`)
+- oxfmtConfig (Merges typed Oxfmt config modules)
+- oxfmtConfigBase (General formatting options)
+- oxfmtConfigNext (Next.js generated-file ignores)
+- oxfmtConfigTanstackStart (TanStack Start generated-file ignores)
 
 #### Built-in features:
 
@@ -155,24 +158,67 @@ they use.
 
 ```ts
 // oxlint.config.ts
-import { defineConfig } from 'oxlint';
-import { oxlintConfig } from '@hiddenability/opinionated-defaults/oxlint';
+import {
+  oxlintConfig,
+  oxlintConfigBase,
+} from '@hiddenability/opinionated-defaults/oxlint';
 
-export default defineConfig(oxlintConfig);
+export default oxlintConfig([oxlintConfigBase]);
 ```
 
-Use `oxlintConfigReact` for React projects or `oxlintConfigNext` for Next.js
-projects when configuring Oxlint manually.
+For React, add `oxlintConfigReact` to the shared config array. For Next.js, add
+both `oxlintConfigReact` and `oxlintConfigNext`.
+
+In a mixed workspace, the CLI keeps only configuration shared by every project
+in the first `oxlintConfig` argument. Each project-specific config is grouped
+by all project paths that use it:
+
+```ts
+import {
+  oxlintConfig,
+  oxlintConfigBase,
+  oxlintConfigNext,
+  oxlintConfigReact,
+  oxlintIgnorePatterns,
+  oxlintOverride,
+} from '@hiddenability/opinionated-defaults/oxlint';
+
+export default oxlintConfig([oxlintConfigBase], {
+  ignorePatterns: oxlintIgnorePatterns([oxlintConfigNext]),
+  overrides: [
+    oxlintOverride(
+      ['apps/dashboard/**/*', 'apps/marketing/**/*'],
+      [oxlintConfigReact],
+    ),
+    oxlintOverride(['apps/dashboard/**/*'], [oxlintConfigNext]),
+  ],
+});
+```
+
+Oxlint applies every matching override in declaration order. In this example,
+the dashboard receives both React and Next.js configuration, while marketing
+receives only React. Later configs win duplicate object keys; distinct keys are
+preserved. `plugins` and `ignorePatterns` are deduplicated in first-seen order,
+and `overrides` are appended. No object spreading or repeated shared config is
+required.
+
+Framework-generated ignore options remain owned by their corresponding npm
+config modules rather than duplicated in the native CLI.
 
 ### Oxfmt:
 
 ```ts
 // oxfmt.config.ts
-import { defineConfig } from 'oxfmt';
-import { oxfmtConfig } from '@hiddenability/opinionated-defaults/oxfmt';
+import {
+  oxfmtConfig,
+  oxfmtConfigBase,
+} from '@hiddenability/opinionated-defaults/oxfmt';
 
-export default defineConfig(oxfmtConfig);
+export default oxfmtConfig(oxfmtConfigBase);
 ```
+
+Append `oxfmtConfigNext` or `oxfmtConfigTanstackStart` when formatting those
+frameworks manually.
 
 ### Eslint:
 
@@ -249,7 +295,6 @@ export default prettierConfig(prettierConfigBase, prettierConfigTailwind, {
   tailwindStylesheet: `./app/styles.css`,
 });
 ```
-
 
 ## TODO:
 

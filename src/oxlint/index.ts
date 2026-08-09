@@ -1,20 +1,5 @@
-import oxlintConfigBase from '../oxlintrc.json';
-
-type OxlintConfig = typeof oxlintConfigBase;
-
-export { default as oxlintConfig } from '../oxlintrc.json';
-
-const withPlugins = (...plugins: string[]): OxlintConfig => ({
-  ...oxlintConfigBase,
-  plugins: [...new Set([...oxlintConfigBase.plugins, ...plugins])],
-});
-
-export const oxlintConfigReact: OxlintConfig = withPlugins(
-  `react`,
-  `react-perf`,
-);
-export const oxlintConfigNext: OxlintConfig = withPlugins(
-  `react`,
-  `react-perf`,
-  `nextjs`,
-);
+export { default as oxlintConfigBase } from './base';
+export { oxlintConfig, oxlintIgnorePatterns, oxlintOverride } from './config';
+export { default as oxlintConfigNext } from './next';
+export { default as oxlintConfigReact } from './react';
+export { default as oxlintConfigTanstackStart } from './tanstack-start';
