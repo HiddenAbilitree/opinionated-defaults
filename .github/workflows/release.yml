@@ -58,9 +58,9 @@ jobs:
         if: runner.os == 'Linux'
         run: cargo install cross --git https://github.com/cross-rs/cross --branch main
 
-      - name: Copy config files for cross-compilation
+      - name: Copy build inputs for cross-compilation
         if: runner.os == 'Linux'
-        run: cp ../src/oxlintrc.json ../src/oxfmtrc.json src/
+        run: cp ../src/oxlintrc.json ../src/oxfmtrc.json ../package.json src/
 
       - name: Build binary
         run: |

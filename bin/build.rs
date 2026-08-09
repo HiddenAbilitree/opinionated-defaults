@@ -29,9 +29,22 @@ fn main() {
 }
 
 fn generate_eslint_prettier_dependencies(manifest_dir: &str, out_dir: &str) {
-  let package_path = PathBuf::from(manifest_dir).join("../package.json");
+  let package_paths = [
+    PathBuf::from(manifest_dir).join("../package.json"),
+    PathBuf::from(manifest_dir).join("src/package.json"),
+  ];
+  let package_path = package_paths
+    .iter()
+    .find(|path| path.is_file())
+    .unwrap_or_else(|| {
+      panic!(
+        "could not find package.json at {} or {}",
+        package_paths[0].display(),
+        package_paths[1].display()
+      )
+    });
   let package: Value = serde_json::from_str(
-    &read_to_string(&package_path)
+    &read_to_string(package_path)
       .unwrap_or_else(|error| panic!("could not read {}: {error}", package_path.display())),
   )
   .unwrap_or_else(|error| panic!("could not parse {}: {error}", package_path.display()));
@@ -67,5 +80,7 @@ fn generate_eslint_prettier_dependencies(manifest_dir: &str, out_dir: &str) {
   write(&output_path, generated)
     .unwrap_or_else(|error| panic!("could not write {}: {error}", output_path.display()));
 
-  println!("cargo:rerun-if-changed={}", package_path.display());
+  for package_path in package_paths {
+    println!("cargo:rerun-if-changed={}", package_path.display());
+  }
 }
