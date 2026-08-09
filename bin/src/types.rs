@@ -117,6 +117,7 @@ impl PackageManager {
         }
         Tooling::Ox => {
           cmd
+            .arg("npm:@hiddenability/opinionated-defaults@latest")
             .arg("npm:oxlint")
             .arg("npm:oxlint-tsgolint")
             .arg("npm:oxfmt")
@@ -141,7 +142,11 @@ impl PackageManager {
         }
       }
       Tooling::Ox => {
-        cmd.arg("oxlint").arg("oxlint-tsgolint").arg("oxfmt");
+        cmd
+          .arg("@hiddenability/opinionated-defaults@latest")
+          .arg("oxlint")
+          .arg("oxlint-tsgolint")
+          .arg("oxfmt");
       }
     }
     cmd.arg("@types/node").arg(dev_flag);
@@ -165,6 +170,21 @@ pub struct JSONLockfile {
 }
 
 #[derive(Deserialize)]
+#[serde(untagged)]
+pub enum Workspaces {
+  Patterns(Vec<String>),
+  Config { packages: Vec<String> },
+}
+
+impl Workspaces {
+  pub fn patterns(&self) -> &[String] {
+    match self {
+      Self::Patterns(patterns) | Self::Config { packages: patterns } => patterns,
+    }
+  }
+}
+
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PackageJSON {
   #[serde(default)]
@@ -173,6 +193,18 @@ pub struct PackageJSON {
   pub dev_dependencies: Packages,
   #[serde(default)]
   pub peer_dependencies: Packages,
+  pub workspaces: Option<Workspaces>,
+}
+
+impl PackageJSON {
+  pub fn into_packages(self) -> Packages {
+    self
+      .dependencies
+      .into_iter()
+      .chain(self.dev_dependencies)
+      .chain(self.peer_dependencies)
+      .collect()
+  }
 }
 
 #[derive(Deserialize)]
@@ -218,11 +250,11 @@ mod tests {
   }
 
   #[test]
-  fn oxlint_install_does_not_include_eslint_dependencies() {
+  fn oxlint_install_includes_config_package_without_eslint_dependencies() {
     let args = args(PackageManager::Npm, Tooling::Ox);
 
     assert!(
-      !args
+      args
         .iter()
         .any(|arg| arg == "@hiddenability/opinionated-defaults@latest")
     );
@@ -243,5 +275,7 @@ mod tests {
     for dependency in ESLINT_PRETTIER_DEPENDENCIES {
       assert!(args.iter().any(|arg| arg == dependency));
     }
+    assert!(!args.iter().any(|arg| arg.starts_with("oxfmt@")));
+    assert!(!args.iter().any(|arg| arg.starts_with("oxlint@")));
   }
 }

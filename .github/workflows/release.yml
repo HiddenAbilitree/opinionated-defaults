@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -58,9 +58,9 @@ jobs:
         if: runner.os == 'Linux'
         run: cargo install cross --git https://github.com/cross-rs/cross --branch main
 
-      - name: Copy config files for cross-compilation
+      - name: Copy build inputs for cross-compilation
         if: runner.os == 'Linux'
-        run: cp ../src/oxlintrc.json ../src/oxfmtrc.json src/
+        run: cp ../package.json src/
 
       - name: Build binary
         run: |
@@ -111,7 +111,6 @@ jobs:
           node-version: latest
           registry-url: 'https://registry.npmjs.org'
 
-
       - name: Publish to NPM
         run: |
           cd ${{ steps.prep.outputs.pkg_dir }}
@@ -127,10 +126,10 @@ jobs:
       id-token: write
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: latest
           registry-url: 'https://registry.npmjs.org'

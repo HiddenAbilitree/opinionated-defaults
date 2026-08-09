@@ -1,7 +1,7 @@
 use std::{
   collections::BTreeMap,
   env::var,
-  fs::{copy, read_to_string, write},
+  fs::{read_to_string, write},
   path::PathBuf,
 };
 
@@ -11,27 +11,26 @@ fn main() {
   let out_dir = var("OUT_DIR").unwrap();
   let manifest_dir = var("CARGO_MANIFEST_DIR").unwrap();
 
-  for name in &["oxlintrc.json", "oxfmtrc.json"] {
-    let repo_src = format!("{manifest_dir}/../src/{name}");
-    let local_src = format!("{manifest_dir}/src/{name}");
-    let dst = format!("{out_dir}/{name}");
-
-    if copy(&repo_src, &dst).is_err() {
-      copy(&local_src, &dst)
-        .unwrap_or_else(|_| panic!("could not find {name} at {repo_src} or {local_src}"));
-    }
-
-    println!("cargo:rerun-if-changed={repo_src}");
-    println!("cargo:rerun-if-changed={local_src}");
-  }
-
   generate_eslint_prettier_dependencies(&manifest_dir, &out_dir);
 }
 
 fn generate_eslint_prettier_dependencies(manifest_dir: &str, out_dir: &str) {
-  let package_path = PathBuf::from(manifest_dir).join("../package.json");
+  let package_paths = [
+    PathBuf::from(manifest_dir).join("../package.json"),
+    PathBuf::from(manifest_dir).join("src/package.json"),
+  ];
+  let package_path = package_paths
+    .iter()
+    .find(|path| path.is_file())
+    .unwrap_or_else(|| {
+      panic!(
+        "could not find package.json at {} or {}",
+        package_paths[0].display(),
+        package_paths[1].display()
+      )
+    });
   let package: Value = serde_json::from_str(
-    &read_to_string(&package_path)
+    &read_to_string(package_path)
       .unwrap_or_else(|error| panic!("could not read {}: {error}", package_path.display())),
   )
   .unwrap_or_else(|error| panic!("could not parse {}: {error}", package_path.display()));
@@ -43,6 +42,7 @@ fn generate_eslint_prettier_dependencies(manifest_dir: &str, out_dir: &str) {
 
   let dependencies = dependencies
     .iter()
+    .filter(|(name, _)| !matches!(name.as_str(), "oxfmt" | "oxlint"))
     .map(|(name, version)| {
       let version = version
         .as_str()
@@ -64,9 +64,10 @@ fn generate_eslint_prettier_dependencies(manifest_dir: &str, out_dir: &str) {
   generated.push_str("];\n");
 
   let output_path = PathBuf::from(out_dir).join("eslint_prettier_dependencies.rs");
-  write(&output_path, generated).unwrap_or_else(|error| {
-    panic!("could not write {}: {error}", output_path.display())
-  });
+  write(&output_path, generated)
+    .unwrap_or_else(|error| panic!("could not write {}: {error}", output_path.display()));
 
-  println!("cargo:rerun-if-changed={}", package_path.display());
+  for package_path in package_paths {
+    println!("cargo:rerun-if-changed={}", package_path.display());
+  }
 }

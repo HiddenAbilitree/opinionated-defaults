@@ -40,16 +40,6 @@
         "default": "./dist/oxfmt/index.mjs",
         "types": "./dist/oxfmt/index.d.ts"
       }
-    },
-    "./oxlintrc": {
-      "import": {
-        "default": "./dist/oxlintrc.json"
-      }
-    },
-    "./oxfmtrc": {
-      "import": {
-        "default": "./dist/oxfmtrc.json"
-      }
     }
   },
   "files": [
@@ -75,38 +65,100 @@
     "eslint-plugin-unicorn": "^62.0.0",
     "jiti": "^2.6.1",
     "lodash": "^4.17.21",
+    "oxfmt": "^0.62.0",
+    "oxlint": "^1.77.0",
     "prettier": "^3.7.4",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "0.7.2"
   },
   "peerDependenciesMeta": {
-    "@eslint/compat": { "optional": true },
-    "@eslint/js": { "optional": true },
-    "@next/eslint-plugin-next": { "optional": true },
-    "@stylistic/eslint-plugin": { "optional": true },
-    "@trivago/prettier-plugin-sort-imports": { "optional": true },
-    "eslint": { "optional": true },
-    "eslint-config-prettier": { "optional": true },
-    "eslint-plugin-astro": { "optional": true },
-    "eslint-plugin-better-tailwindcss": { "optional": true },
-    "eslint-plugin-functional": { "optional": true },
-    "eslint-plugin-import": { "optional": true },
-    "eslint-plugin-no-relative-import-paths": { "optional": true },
-    "eslint-plugin-oxlint": { "optional": true },
-    "eslint-plugin-perfectionist": { "optional": true },
-    "eslint-plugin-prefer-arrow-functions": { "optional": true },
-    "eslint-plugin-prettier": { "optional": true },
-    "eslint-plugin-react": { "optional": true },
-    "eslint-plugin-react-hooks": { "optional": true },
-    "eslint-plugin-solid": { "optional": true },
-    "eslint-plugin-turbo": { "optional": true },
-    "eslint-plugin-unicorn": { "optional": true },
-    "jiti": { "optional": true },
-    "lodash": { "optional": true },
-    "prettier": { "optional": true },
-    "prettier-plugin-astro": { "optional": true },
-    "prettier-plugin-tailwindcss": { "optional": true },
-    "typescript-eslint": { "optional": true }
+    "@eslint/compat": {
+      "optional": true
+    },
+    "@eslint/js": {
+      "optional": true
+    },
+    "@next/eslint-plugin-next": {
+      "optional": true
+    },
+    "@stylistic/eslint-plugin": {
+      "optional": true
+    },
+    "@trivago/prettier-plugin-sort-imports": {
+      "optional": true
+    },
+    "eslint": {
+      "optional": true
+    },
+    "eslint-config-prettier": {
+      "optional": true
+    },
+    "eslint-plugin-astro": {
+      "optional": true
+    },
+    "eslint-plugin-better-tailwindcss": {
+      "optional": true
+    },
+    "eslint-plugin-functional": {
+      "optional": true
+    },
+    "eslint-plugin-import": {
+      "optional": true
+    },
+    "eslint-plugin-no-relative-import-paths": {
+      "optional": true
+    },
+    "eslint-plugin-oxlint": {
+      "optional": true
+    },
+    "eslint-plugin-perfectionist": {
+      "optional": true
+    },
+    "eslint-plugin-prefer-arrow-functions": {
+      "optional": true
+    },
+    "eslint-plugin-prettier": {
+      "optional": true
+    },
+    "eslint-plugin-react": {
+      "optional": true
+    },
+    "eslint-plugin-react-hooks": {
+      "optional": true
+    },
+    "eslint-plugin-solid": {
+      "optional": true
+    },
+    "eslint-plugin-turbo": {
+      "optional": true
+    },
+    "eslint-plugin-unicorn": {
+      "optional": true
+    },
+    "jiti": {
+      "optional": true
+    },
+    "lodash": {
+      "optional": true
+    },
+    "oxfmt": {
+      "optional": true
+    },
+    "oxlint": {
+      "optional": true
+    },
+    "prettier": {
+      "optional": true
+    },
+    "prettier-plugin-astro": {
+      "optional": true
+    },
+    "prettier-plugin-tailwindcss": {
+      "optional": true
+    },
+    "typescript-eslint": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@hiddenability/opinionated-defaults": "link:@hiddenability/opinionated-defaults",
@@ -139,6 +191,8 @@
     "jiti": "^2.6.1",
     "lodash": "^4.17.21",
     "oxc-transform": "^0.105.0",
+    "oxfmt": "^0.62.0",
+    "oxlint": "^1.77.0",
     "prettier": "^3.7.4",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "0.7.2",
