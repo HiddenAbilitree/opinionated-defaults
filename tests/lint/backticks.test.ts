@@ -2,7 +2,7 @@ import { test } from 'bun:test';
 
 import { testEslint } from './utils';
 
-test.failing(`backticks`, async () => {
+test(`backticks`, async () => {
   const source = [
     `import _ from './backticks.json' with { type: 'json' };`,
     `type __shouldBeSingleQuotes = typeof import('fs');`,
