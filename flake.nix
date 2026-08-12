@@ -53,8 +53,6 @@
 
           scripts = [
             (mkScript "build" "bun run build")
-            (mkScript "lint" "oxlint && eslint_d")
-            (mkScript "lint:fix" "oxlint --fix --fix-suggestions && eslint_d --fix")
             (mkScript "demo" ''nix-shell -p vhs difftastic --run "vhs demo.tape --output ./assets/demo.gif"'')
           ];
 
@@ -71,9 +69,7 @@
             buildInputs = [
               rust
               pkgs.bun
-              pkgs.nodejs_24
-              pkgs.oxlint
-              pkgs.eslint_d
+              pkgs.nodejs_26
             ]
             ++ scripts;
           };

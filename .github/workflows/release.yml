@@ -105,6 +105,12 @@ jobs:
           NODE_ARCH: ${{ steps.set_env_vars.outputs.pkg_arch }}
           NODE_PKG_NAME: ${{ steps.set_env_vars.outputs.pkg_name }}
 
+      - name: Upload package metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-package-${{ matrix.name }}
+          path: bin/${{ steps.prep.outputs.pkg_dir }}/package.json
+
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
@@ -128,6 +134,12 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
 
+      - name: download package metadata
+        uses: actions/download-artifact@v4
+        with:
+          pattern: npm-package-*
+          path: release-packages
+
       - name: setup node
         uses: actions/setup-node@v7
         with:
@@ -142,23 +154,10 @@ jobs:
       - name: install dependencies
         run: bun link && bun ci
 
-      - name: set version from tag
+      - name: prepare release manifest
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          export VERSION
-          npm version "$VERSION" --no-git-tag-version
-          node <<'NODE'
-          const fs = require('node:fs');
-          const version = process.env.VERSION;
-          const packagePath = 'package.json';
-          const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-
-          for (const name of Object.keys(packageJson.optionalDependencies ?? {})) {
-            packageJson.optionalDependencies[name] = version;
-          }
-
-          fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2) + '\n');
-          NODE
+          bun scripts/prepare-release.ts package.json release-packages "$VERSION"
 
       - name: release new version
         run: npm publish --provenance --access public

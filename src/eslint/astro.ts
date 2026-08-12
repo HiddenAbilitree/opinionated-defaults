@@ -1,7 +1,6 @@
+import { configs } from 'eslint-plugin-astro';
 import type { ConfigArray } from 'typescript-eslint';
 
-import eslintPluginAstro from 'eslint-plugin-astro';
-
-const astroConfig: ConfigArray = [...eslintPluginAstro.configs.recommended];
+const astroConfig: ConfigArray = [...configs.recommended];
 
 export default astroConfig;

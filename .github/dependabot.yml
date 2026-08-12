@@ -9,3 +9,5 @@ updates:
       all:
         patterns:
           - '*'
+    ignore:
+      - dependency-name: '@hiddenability/opinionated-defaults'

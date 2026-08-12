@@ -1,9 +1,8 @@
+import { configs } from 'eslint-plugin-perfectionist';
 import type { ConfigArray } from 'typescript-eslint';
 
-import perfectionist from 'eslint-plugin-perfectionist';
-
 const perfectionistConfig: ConfigArray = [
-  perfectionist.configs[`recommended-natural`],
+  configs[`recommended-natural`],
   {
     rules: {
       'perfectionist/sort-object-types': [
