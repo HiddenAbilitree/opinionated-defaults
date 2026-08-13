@@ -1,5 +1,5 @@
 <div align="center">
-  
+
 # ![Banner](/assets/banner.svg)
 
 ![Demo](/assets/demo.gif)
@@ -51,18 +51,18 @@ bunx @hiddenability/opinionated-defaults -ox  # Oxlint + Oxfmt
 
 #### Exports:
 
-- eslintConfig (Used to provide autocomplete)
-- eslintConfigAstro (Astro)
-- eslintConfigBase (General rules for every project)
-- eslintConfigElysia (Elysia.js)
-- eslintConfigFunctional (Enforces functional style)
-- eslintConfigNext (Next.js)
-- eslintConfigOxlint (Disables ESlint rules available in Oxlint)
-- eslintConfigPrettier (Runs Prettier as ESLint rules)
-- eslintConfigReact (General rules for React)
-- eslintConfigRelative (Enforces the use of absolute import paths using path aliases)
-- eslintConfigStylistic (Enforces code-style through ESLint rules)
-- eslintConfigTurbo (Turborepo)
+- `/eslint`: `eslintConfig`, `eslintConfigBase`, and `eslintConfigDefaultProject`
+- `/eslint/astro`: Astro configuration
+- `/eslint/better-tailwindcss`: Tailwind CSS linting
+- `/eslint/functional`: Functional style
+- `/eslint/next`: Next.js
+- `/eslint/oxlint`: Disables ESLint rules covered by Oxlint
+- `/eslint/perfectionist`: Natural ordering
+- `/eslint/prettier`: Prettier ESLint integration
+- `/eslint/react`: React and React Hooks
+- `/eslint/relative`: Absolute import paths
+- `/eslint/solid`: Solid
+- `/eslint/turbo`: Turborepo
 
 #### Included plugins:
 
@@ -153,10 +153,7 @@ npm i @hiddenability/opinionated-defaults -D
 
 ```ts
 // oxlint.config.ts
-import {
-  oxlintConfig,
-  oxlintConfigBase,
-} from '@hiddenability/opinionated-defaults/oxlint';
+import { oxlintConfig, oxlintConfigBase } from '@hiddenability/opinionated-defaults/oxlint';
 
 export default oxlintConfig([oxlintConfigBase]);
 ```
@@ -174,10 +171,7 @@ import {
 export default oxlintConfig([oxlintConfigBase], {
   ignorePatterns: oxlintIgnorePatterns([oxlintConfigNext]),
   overrides: [
-    oxlintOverride(
-      ['apps/dashboard/**/*', 'apps/marketing/**/*'],
-      [oxlintConfigReact],
-    ),
+    oxlintOverride(['apps/dashboard/**/*', 'apps/marketing/**/*'], [oxlintConfigReact]),
     oxlintOverride(['apps/dashboard/**/*'], [oxlintConfigNext]),
   ],
 });
@@ -187,10 +181,7 @@ export default oxlintConfig([oxlintConfigBase], {
 
 ```ts
 // oxfmt.config.ts
-import {
-  oxfmtConfig,
-  oxfmtConfigBase,
-} from '@hiddenability/opinionated-defaults/oxfmt';
+import { oxfmtConfig, oxfmtConfigBase } from '@hiddenability/opinionated-defaults/oxfmt';
 
 export default oxfmtConfig(oxfmtConfigBase);
 ```
@@ -202,26 +193,17 @@ frameworks manually.
 
 ```ts
 // eslint.config.ts
-import {
-  eslintConfig,
-  eslintConfigBase,
-} from '@hiddenability/opinionated-defaults/eslint';
+import { eslintConfig, eslintConfigBase } from '@hiddenability/opinionated-defaults/eslint';
+import eslintConfigPrettier from '@hiddenability/opinionated-defaults/eslint/prettier';
 
-export default eslintConfig([
-  ...eslintConfigBase,
-  // ...eslintConfigPrettier, // other configs fit right in!
-  // { /* your rules here */ },
-]);
+export default eslintConfig([...eslintConfigBase, ...eslintConfigPrettier]);
 ```
 
 ### Prettier:
 
 ```ts
 // prettier.config.mjs
-import {
-  prettierConfig,
-  prettierConfigBase,
-} from '@hiddenability/opinionated-defaults/prettier';
+import { prettierConfig, prettierConfigBase } from '@hiddenability/opinionated-defaults/prettier';
 
 export default prettierConfig(prettierConfigBase);
 ```
@@ -241,9 +223,7 @@ import {
 export default prettierConfig(
   prettierConfig1,
   prettierConfig2,
-  {
-    /* your custom rules */
-  },
+  {/* your custom rules */},
   /*...*/
 );
 ```

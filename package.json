@@ -19,6 +19,72 @@
         "types": "./dist/eslint/index.d.ts"
       }
     },
+    "./eslint/astro": {
+      "import": {
+        "default": "./dist/eslint/astro.mjs",
+        "types": "./dist/eslint/astro.d.ts"
+      }
+    },
+    "./eslint/better-tailwindcss": {
+      "import": {
+        "default": "./dist/eslint/better-tailwindcss.mjs",
+        "types": "./dist/eslint/better-tailwindcss.d.ts"
+      }
+    },
+    "./eslint/functional": {
+      "import": {
+        "default": "./dist/eslint/functional.mjs",
+        "types": "./dist/eslint/functional.d.ts"
+      }
+    },
+    "./eslint/next": {
+      "import": {
+        "default": "./dist/eslint/next.mjs",
+        "types": "./dist/eslint/next.d.ts"
+      }
+    },
+    "./eslint/oxlint": {
+      "import": {
+        "default": "./dist/eslint/oxlint.mjs",
+        "types": "./dist/eslint/oxlint.d.ts"
+      }
+    },
+    "./eslint/perfectionist": {
+      "import": {
+        "default": "./dist/eslint/perfectionist.mjs",
+        "types": "./dist/eslint/perfectionist.d.ts"
+      }
+    },
+    "./eslint/prettier": {
+      "import": {
+        "default": "./dist/eslint/prettier.mjs",
+        "types": "./dist/eslint/prettier.d.ts"
+      }
+    },
+    "./eslint/react": {
+      "import": {
+        "default": "./dist/eslint/react.mjs",
+        "types": "./dist/eslint/react.d.ts"
+      }
+    },
+    "./eslint/relative": {
+      "import": {
+        "default": "./dist/eslint/relative.mjs",
+        "types": "./dist/eslint/relative.d.ts"
+      }
+    },
+    "./eslint/solid": {
+      "import": {
+        "default": "./dist/eslint/solid.mjs",
+        "types": "./dist/eslint/solid.d.ts"
+      }
+    },
+    "./eslint/turbo": {
+      "import": {
+        "default": "./dist/eslint/turbo.mjs",
+        "types": "./dist/eslint/turbo.d.ts"
+      }
+    },
     "./prettier": {
       "import": {
         "default": "./dist/prettier/index.mjs",
@@ -57,6 +123,7 @@
     "@types/bun": "^1.3.14",
     "@types/lodash": "^4.17.25",
     "@types/node": "^26.2.0",
+    "@typescript-eslint/parser": "^8.67.0",
     "@typescript/native": "npm:typescript@^7.0.2",
     "consola": "^3.4.2",
     "eslint": "^9.39.5",
@@ -64,7 +131,6 @@
     "eslint-plugin-astro": "^1.7.0",
     "eslint-plugin-better-tailwindcss": "^4.7.0",
     "eslint-plugin-functional": "^10.0.0",
-    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-no-relative-import-paths": "^1.6.1",
     "eslint-plugin-oxlint": "1.78.0",
     "eslint-plugin-perfectionist": "^5.10.1",
@@ -76,6 +142,7 @@
     "eslint-plugin-turbo": "^2.10.9",
     "eslint-plugin-unicorn": "^62.0.0",
     "eslint_d": "^14.3.0",
+    "globals": "^16.5.0",
     "jiti": "^2.7.0",
     "lodash": "^4.18.1",
     "oxc-transform": "^0.144.0",
@@ -94,25 +161,31 @@
     "@next/eslint-plugin-next": "^16.1.1",
     "@stylistic/eslint-plugin": "^5.6.1",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
+    "@typescript-eslint/parser": "^8.67.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^1.5.0",
     "eslint-plugin-better-tailwindcss": "^4.0.1",
-    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-functional": "^10.0.0",
     "eslint-plugin-no-relative-import-paths": "^1.6.1",
-    "eslint-plugin-oxlint": "1.35.0",
+    "eslint-plugin-oxlint": "^1.78.0",
+    "eslint-plugin-perfectionist": "^5.10.1",
+    "eslint-plugin-prefer-arrow-functions": "^3.10.2",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-solid": "^0.14.5",
     "eslint-plugin-turbo": "^2.7.2",
     "eslint-plugin-unicorn": "^62.0.0",
+    "globals": "^16.5.0",
     "jiti": "^2.6.1",
     "lodash": "^4.17.21",
-    "oxfmt": "^0.62.0",
-    "oxlint": "^1.77.0",
-    "prettier": "^3.7.4",
+    "oxfmt": "^0.63.0",
+    "oxlint": "^1.78.0",
+    "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
-    "prettier-plugin-tailwindcss": "0.7.2"
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "typescript-eslint": "^8.67.0"
   },
   "peerDependenciesMeta": {
     "@eslint/compat": {
@@ -130,6 +203,9 @@
     "@trivago/prettier-plugin-sort-imports": {
       "optional": true
     },
+    "@typescript-eslint/parser": {
+      "optional": true
+    },
     "eslint": {
       "optional": true
     },
@@ -143,9 +219,6 @@
       "optional": true
     },
     "eslint-plugin-functional": {
-      "optional": true
-    },
-    "eslint-plugin-import": {
       "optional": true
     },
     "eslint-plugin-no-relative-import-paths": {
@@ -176,6 +249,9 @@
       "optional": true
     },
     "eslint-plugin-unicorn": {
+      "optional": true
+    },
+    "globals": {
       "optional": true
     },
     "jiti": {

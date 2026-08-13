@@ -1,11 +1,10 @@
 <div align="center">
-  
+
 # ![Banner](/assets/banner.svg)
 
 ![Demo](/assets/demo.gif)
 
 A collection of opinionated web-dev tooling configurations.
-
 
 ![GitHub Tag](https://img.shields.io/github/v/tag/hiddenabilitree/opinionated-defaults?style=for-the-badge)
 ![NPM Downloads](https://img.shields.io/npm/d18m/%40hiddenability%2Fopinionated-defaults?style=for-the-badge)
@@ -22,7 +21,7 @@ A collection of opinionated web-dev tooling configurations.
 
 > [!NOTE]
 > The package manager that the CLI will use to install this package is dependent on what lockfile you have in the root of your project (i.e., having bun.lock will use bun, while having package-lock.json will use npm).
-> 
+>
 > **Currently, the only supported package managers are bun and npm**.
 
 This package contains a CLI that can be used to generate both eslint.config.ts and prettier.config.mjs files.
@@ -47,18 +46,18 @@ npx @hiddenability/opinionated-defaults
 
 #### Exports:
 
-- eslintConfig (Used to provide autocomplete)
-- eslintConfigAstro (Astro)
-- eslintConfigBase (General rules for every project)
-- eslintConfigElysia (Elysia.js)
-- eslintConfigFunctional (Enforces functional style)
-- eslintConfigNext (Next.js)
-- eslintConfigOxlint (Disables ESlint rules available in Oxlint)
-- eslintConfigPrettier (Runs Prettier as ESLint rules)
-- eslintConfigReact (General rules for React)
-- eslintConfigRelative (Enforces the use of absolute import paths using path aliases)
-- eslintConfigStylistic (Enforces code-style through ESLint rules)
-- eslintConfigTurbo (Turborepo)
+- `/eslint`: `eslintConfig`, `eslintConfigBase`, and `eslintConfigDefaultProject`
+- `/eslint/astro`: Astro configuration
+- `/eslint/better-tailwindcss`: Tailwind CSS linting
+- `/eslint/functional`: Functional style
+- `/eslint/next`: Next.js
+- `/eslint/oxlint`: Disables ESLint rules covered by Oxlint
+- `/eslint/perfectionist`: Natural ordering
+- `/eslint/prettier`: Prettier ESLint integration
+- `/eslint/react`: React and React Hooks
+- `/eslint/relative`: Absolute import paths
+- `/eslint/solid`: Solid
+- `/eslint/turbo`: Turborepo
 
 #### Included plugins:
 
@@ -113,26 +112,17 @@ npm i @hiddenability/opinionated-defaults -D
 
 ```ts
 // eslint.config.ts
-import {
-  eslintConfig,
-  eslintConfigBase,
-} from '@hiddenability/opinionated-defaults/eslint';
+import { eslintConfig, eslintConfigBase } from '@hiddenability/opinionated-defaults/eslint';
+import eslintConfigPrettier from '@hiddenability/opinionated-defaults/eslint/prettier';
 
-export default eslintConfig([
-  ...eslintConfigBase,
-  // ...eslintConfigPrettier, // other configs fit right in!
-  // { /* your rules here */ },
-]);
+export default eslintConfig([...eslintConfigBase, ...eslintConfigPrettier]);
 ```
 
 ### Prettier:
 
 ```ts
 // prettier.config.mjs
-import {
-  prettierConfig,
-  prettierConfigBase,
-} from '@hiddenability/opinionated-defaults/prettier';
+import { prettierConfig, prettierConfigBase } from '@hiddenability/opinionated-defaults/prettier';
 
 export default prettierConfig(prettierConfigBase);
 ```
@@ -152,9 +142,7 @@ import {
 export default prettierConfig(
   prettierConfig1,
   prettierConfig2,
-  {
-    /* your custom rules */
-  },
+  {/* your custom rules */},
   /*...*/
 );
 ```
@@ -184,7 +172,6 @@ export default prettierConfig(prettierConfigBase, prettierConfigTailwind, {
   tailwindStylesheet: `./app/styles.css`,
 });
 ```
-
 
 ## TODO:
 

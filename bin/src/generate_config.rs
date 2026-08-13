@@ -24,6 +24,23 @@ fn dep(pkg: &str, import: &str) -> (String, String) {
   (pkg.into(), import.into())
 }
 
+fn eslint_config_path(import: &str) -> Option<&'static str> {
+  match import {
+    "eslintConfigAstro" => Some("astro"),
+    "eslintConfigBetterTailwindcss" => Some("better-tailwindcss"),
+    "eslintConfigFunctional" => Some("functional"),
+    "eslintConfigNext" => Some("next"),
+    "eslintConfigOxlint" => Some("oxlint"),
+    "eslintConfigPerfectionist" => Some("perfectionist"),
+    "eslintConfigPrettier" => Some("prettier"),
+    "eslintConfigReact" => Some("react"),
+    "eslintConfigRelative" => Some("relative"),
+    "eslintConfigSolid" => Some("solid"),
+    "eslintConfigTurbo" => Some("turbo"),
+    _ => None,
+  }
+}
+
 #[derive(Clone, Copy)]
 struct DefaultProjectConfig<'a> {
   files: &'a [&'a str],
@@ -51,10 +68,22 @@ fn build_eslint_config(
 
   writeln!(out, "import {{").unwrap();
   writeln!(out, "  eslintConfig,").unwrap();
-  for import in imports {
+  for import in imports
+    .iter()
+    .filter(|import| eslint_config_path(import).is_none())
+  {
     writeln!(out, "  {import},").unwrap();
   }
   writeln!(out, "}} from '@hiddenability/opinionated-defaults/eslint';").unwrap();
+  for import in imports {
+    if let Some(path) = eslint_config_path(import) {
+      writeln!(
+        out,
+        "import {import} from '@hiddenability/opinionated-defaults/eslint/{path}';"
+      )
+      .unwrap();
+    }
+  }
   writeln!(out, "import {{ fileURLToPath }} from 'node:url';").unwrap();
   writeln!(out).unwrap();
 
@@ -395,5 +424,35 @@ pub fn generate_config(packages: Packages, tooling: Tooling) -> Result<()> {
   match tooling {
     Tooling::Eslint => generate_eslint_config(packages),
     Tooling::Ox => generate_ox_config(&packages),
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{DefaultProjectConfig, build_eslint_config};
+
+  #[test]
+  fn isolates_optional_eslint_config_imports() {
+    let config = build_eslint_config(
+      &[
+        "eslintConfigAstro".into(),
+        "eslintConfigBase".into(),
+        "eslintConfigPrettier".into(),
+      ],
+      &[],
+      DefaultProjectConfig {
+        files: &[],
+        default_project: None,
+      },
+    );
+
+    assert!(config.contains(
+      "import eslintConfigAstro from '@hiddenability/opinionated-defaults/eslint/astro';"
+    ));
+    assert!(config.contains(
+      "import eslintConfigPrettier from '@hiddenability/opinionated-defaults/eslint/prettier';"
+    ));
+    assert!(!config.contains("  eslintConfigAstro,"));
+    assert!(!config.contains("  eslintConfigPrettier,"));
   }
 }

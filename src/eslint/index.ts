@@ -1,14 +1,3 @@
-export { default as eslintConfigAstro } from './astro';
 export { default as eslintConfigBase } from './base';
-export { default as eslintConfigBetterTailwindcss } from './better-tailwindcss';
 export { eslintConfig } from './config';
 export { default as eslintConfigDefaultProject } from './default-project';
-export { default as eslintConfigFunctional } from './functional';
-export { default as eslintConfigNext } from './next';
-export { default as eslintConfigOxlint } from './oxlint';
-export { default as eslintConfigPerfectionist } from './perfectionist';
-export { default as eslintConfigPrettier } from './prettier';
-export { default as eslintConfigReact } from './react';
-export { default as eslintConfigRelative } from './relative';
-export { default as eslintConfigSolid } from './solid';
-export { default as eslintConfigTurbo } from './turbo';

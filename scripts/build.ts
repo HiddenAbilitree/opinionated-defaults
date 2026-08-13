@@ -1,8 +1,9 @@
+import { rm } from 'node:fs/promises';
+import { performance } from 'node:perf_hooks';
+
 import { build, type BunPlugin, file, pathToFileURL, write } from 'bun';
 import { consola } from 'consola';
 import { colorize } from 'consola/utils';
-import { rm } from 'node:fs/promises';
-import { performance } from 'node:perf_hooks';
 import { isolatedDeclaration } from 'oxc-transform';
 
 await rm(`./dist/cli`, { force: true, recursive: true });
@@ -28,14 +29,9 @@ const dts: BunPlugin = {
     builder.onLoad({ filter: /\.ts$/ }, async (args) => {
       if (!args.path.startsWith(rootPath) || written.has(args.path)) return;
       written.add(args.path);
-      const { code } = await isolatedDeclaration(
-        args.path,
-        await file(args.path).text(),
-      );
+      const { code } = await isolatedDeclaration(args.path, await file(args.path).text());
       await write(
-        args.path
-          .replace(new RegExp(`^${rootPath}`), outPath)
-          .replace(/\.ts$/, `.d.ts`),
+        args.path.replace(new RegExp(`^${rootPath}`), outPath).replace(/\.ts$/, `.d.ts`),
         code,
       );
     });
@@ -46,7 +42,20 @@ performance.mark(`build_start`);
 
 await build({
   entrypoints: [
+    `./src/eslint/astro.ts`,
+    `./src/eslint/base.ts`,
+    `./src/eslint/better-tailwindcss.ts`,
+    `./src/eslint/default-project.ts`,
+    `./src/eslint/functional.ts`,
     `./src/eslint/index.ts`,
+    `./src/eslint/next.ts`,
+    `./src/eslint/oxlint.ts`,
+    `./src/eslint/perfectionist.ts`,
+    `./src/eslint/prettier.ts`,
+    `./src/eslint/react.ts`,
+    `./src/eslint/relative.ts`,
+    `./src/eslint/solid.ts`,
+    `./src/eslint/turbo.ts`,
     `./src/prettier/index.ts`,
     `./src/cli/index.ts`,
     `./src/oxlint/index.ts`,

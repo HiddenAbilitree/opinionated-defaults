@@ -1,7 +1,8 @@
-import type { ConfigArray } from 'typescript-eslint';
-
 import stylistic from '@stylistic/eslint-plugin';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import type { ConfigArray } from 'typescript-eslint';
+
+import prettierConfigBase from '../prettier/base';
 
 const eslintPrettierConfig: ConfigArray = [
   eslintPluginPrettierRecommended,
@@ -11,7 +12,7 @@ const eslintPrettierConfig: ConfigArray = [
     },
     rules: {
       '@stylistic/quotes': [`warn`, `backtick`, { avoidEscape: true }],
-      'prettier/prettier': `warn`,
+      'prettier/prettier': [`warn`, prettierConfigBase],
     },
   },
 ];
