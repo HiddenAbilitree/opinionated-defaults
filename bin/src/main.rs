@@ -76,7 +76,7 @@ fn main() -> Result<()> {
     project = get_package_manager_data().unwrap_or_else(default_project);
   }
 
-  generate_config(project.packages, tooling)?;
+  generate_config(project.packages, tooling, project.manager)?;
 
   println!(
     "✅ Done in {:.2?} using {}",
