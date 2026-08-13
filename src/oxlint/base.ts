@@ -15,17 +15,9 @@ const config: OxlintConfig = {
     typeAware: true,
     typeCheck: true,
   },
-  plugins: [
-    `typescript`,
-    `unicorn`,
-    `oxc`,
-    `import`,
-    `promise`,
-    `node`,
-    `jsx-a11y`,
-  ],
+  plugins: [`typescript`, `unicorn`, `oxc`, `import`, `promise`, `node`, `jsx-a11y`],
   rules: {
-    'no-unassigned-import': [
+    'import/no-unassigned-import': [
       `warn`,
       {
         allow: [`**/*.css`, `**/*.scss`, `**/*.less`],

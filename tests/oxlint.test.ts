@@ -1,6 +1,6 @@
-import type { OxlintConfig } from 'oxlint';
-
 import { expect, test } from 'bun:test';
+
+import type { OxlintConfig } from 'oxlint';
 
 import {
   oxlintConfig,
@@ -28,11 +28,7 @@ test(`oxlint framework configs contain only their project differences`, () => {
 });
 
 test(`oxlint config composes an ordered array of shared configs`, () => {
-  const config = oxlintConfig([
-    oxlintConfigBase,
-    oxlintConfigReact,
-    oxlintConfigNext,
-  ]);
+  const config = oxlintConfig([oxlintConfigBase, oxlintConfigReact, oxlintConfigNext]);
 
   expect(config.plugins).toContain(`typescript`);
   expect(config.plugins).toContain(`react`);
@@ -55,10 +51,54 @@ test(`later configs win duplicate keys while list values deduplicate`, () => {
   ]);
 
   expect(config.rules?.eqeqeq).toBe(`error`);
-  expect(config.plugins?.filter((plugin) => plugin === `react`)).toHaveLength(
-    1,
-  );
+  expect(config.plugins?.filter((plugin) => plugin === `react`)).toHaveLength(1);
   expect(config.plugins).toEqual([`react`, `nextjs`]);
+});
+
+test(`later rule options extend earlier rule options`, () => {
+  const config = oxlintConfig([
+    {
+      rules: {
+        'import/no-unassigned-import': [`warn`, { allow: [`**/*.css`, `**/*.scss`] }],
+      },
+    },
+    {
+      rules: {
+        'import/no-unassigned-import': [`error`, { allow: [`server-only`, `*/css`] }],
+      },
+    },
+  ]);
+
+  expect(config.rules?.[`import/no-unassigned-import`]).toEqual([
+    `error`,
+    {
+      allow: [`**/*.css`, `**/*.scss`, `server-only`, `*/css`],
+    },
+  ]);
+});
+
+test(`file overrides extend matching root rule options`, () => {
+  const config = oxlintConfig([oxlintConfigBase], {
+    overrides: [
+      oxlintOverride(
+        [`apps/nexus/**/*`],
+        [
+          {
+            rules: {
+              'import/no-unassigned-import': [`error`, { allow: [`server-only`, `*/css`] }],
+            },
+          },
+        ],
+      ),
+    ],
+  });
+
+  expect(config.overrides?.[0]?.rules?.[`import/no-unassigned-import`]).toEqual([
+    `error`,
+    {
+      allow: [`**/*.css`, `**/*.scss`, `**/*.less`, `server-only`, `*/css`],
+    },
+  ]);
 });
 
 test(`oxlint config does not alias source collections`, () => {
@@ -78,10 +118,7 @@ test(`oxlint config does not alias source collections`, () => {
 });
 
 test(`oxlint override composes only its declared configs`, () => {
-  const override = oxlintOverride(
-    [`apps/nexus/**/*`],
-    [oxlintConfigReact, oxlintConfigNext],
-  );
+  const override = oxlintOverride([`apps/nexus/**/*`], [oxlintConfigReact, oxlintConfigNext]);
 
   for (const plugin of [`react`, `react-perf`, `nextjs`] as const) {
     expect(override.plugins).toContain(plugin);
@@ -89,17 +126,14 @@ test(`oxlint override composes only its declared configs`, () => {
   expect(override.plugins).not.toContain(`typescript`);
   expect(override.rules?.[`react/exhaustive-deps`]).toBe(`error`);
   expect(override.rules?.[`nextjs/no-img-element`]).toBe(`error`);
-  expect(override.rules?.[`no-unassigned-import`]).toBeUndefined();
+  expect(override.rules?.[`import/no-unassigned-import`]).toBeUndefined();
   expect(override.files).toEqual([`apps/nexus/**/*`]);
 });
 
 test(`oxlint config preserves overlapping config-specific overrides`, () => {
   const config = oxlintConfig([oxlintConfigBase], {
     overrides: [
-      oxlintOverride(
-        [`apps/project-1/**/*`, `apps/project-2/**/*`],
-        [oxlintConfigReact],
-      ),
+      oxlintOverride([`apps/project-1/**/*`, `apps/project-2/**/*`], [oxlintConfigReact]),
       oxlintOverride([`apps/project-1/**/*`], [oxlintConfigNext]),
     ],
   });
@@ -123,7 +157,7 @@ test(`oxlint ignore patterns compose without generated config spreads`, () => {
 });
 
 test(`oxlint base allows stylesheet side effects without package exceptions`, () => {
-  expect(oxlintConfigBase.rules?.[`no-unassigned-import`]).toEqual([
+  expect(oxlintConfigBase.rules?.[`import/no-unassigned-import`]).toEqual([
     `warn`,
     {
       allow: [`**/*.css`, `**/*.scss`, `**/*.less`],
