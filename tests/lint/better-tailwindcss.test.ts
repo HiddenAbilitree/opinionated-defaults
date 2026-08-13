@@ -1,17 +1,14 @@
 import { expect, test } from 'bun:test';
-import { ESLint } from 'eslint';
 import { fileURLToPath } from 'node:url';
 
-const configPath = fileURLToPath(
-  new URL(`better-tailwindcss/eslint.config.ts`, import.meta.url),
-);
+import { ESLint } from 'eslint';
+
+const configPath = fileURLToPath(new URL(`better-tailwindcss/eslint.config.ts`, import.meta.url));
 
 const lintText = async (source: string) => {
   const eslint = new ESLint({ fix: true, overrideConfigFile: configPath });
   const results = await eslint.lintText(source, {
-    filePath: fileURLToPath(
-      new URL(`better-tailwindcss/test-file.tsx`, import.meta.url),
-    ),
+    filePath: fileURLToPath(new URL(`better-tailwindcss/test-file.tsx`, import.meta.url)),
   });
   return results[0]?.output ?? source;
 };

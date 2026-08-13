@@ -1,6 +1,6 @@
-import type { Config } from 'prettier';
-
 import { expect, test } from 'bun:test';
+
+import type { Config } from 'prettier';
 
 import { prettierConfig } from '../src/prettier/config';
 
@@ -46,10 +46,7 @@ const expected1: Config = {
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,
   jsxSingleQuote: true,
-  plugins: [
-    `@trivago/prettier-plugin-sort-imports`,
-    `prettier-plugin-tailwindcss`,
-  ],
+  plugins: [`@trivago/prettier-plugin-sort-imports`, `prettier-plugin-tailwindcss`],
   semi: true,
   singleQuote: true,
   tabWidth: 2,

@@ -2,6 +2,7 @@ detect monorepos (if current directory does not have a lockfile but somewhere ab
 use package.json if it is a monorepo
 
 impl parsing for following package managers
+
 - deno
 - yarn
 - pnpm

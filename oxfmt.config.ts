@@ -1,8 +1,3 @@
-import {
-  oxfmtConfig,
-  oxfmtConfigBase,
-} from '@hiddenability/opinionated-defaults/oxfmt';
+import { oxfmtConfig, oxfmtConfigBase } from '@hiddenability/opinionated-defaults/oxfmt';
 
-export default oxfmtConfig(
-  oxfmtConfigBase,
-);
+export default oxfmtConfig(oxfmtConfigBase);

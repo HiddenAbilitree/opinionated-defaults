@@ -1,6 +1,5 @@
-import type { ConfigArray } from 'typescript-eslint';
-
 import noRelativeImportPaths from 'eslint-plugin-no-relative-import-paths';
+import type { ConfigArray } from 'typescript-eslint';
 
 const relativeConfig: ConfigArray = [
   {
@@ -8,10 +7,7 @@ const relativeConfig: ConfigArray = [
       'no-relative-import-paths': noRelativeImportPaths,
     },
     rules: {
-      'no-relative-import-paths/no-relative-import-paths': [
-        `error`,
-        { prefix: `@` },
-      ],
+      'no-relative-import-paths/no-relative-import-paths': [`error`, { prefix: `@` }],
     },
   },
 ];

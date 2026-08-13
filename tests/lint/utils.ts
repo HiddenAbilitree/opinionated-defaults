@@ -1,6 +1,7 @@
 import { expect } from 'bun:test';
-import { ESLint } from 'eslint';
 import { fileURLToPath } from 'node:url';
+
+import { ESLint } from 'eslint';
 
 const configPath = fileURLToPath(new URL(`eslint.config.ts`, import.meta.url));
 

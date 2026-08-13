@@ -1,9 +1,6 @@
 import type { OxfmtConfig, OxfmtOverrideConfig } from 'oxfmt';
 
-export const oxfmtConfig = (
-  source: OxfmtConfig,
-  ...sources: OxfmtConfig[]
-): OxfmtConfig => {
+export const oxfmtConfig = (source: OxfmtConfig, ...sources: OxfmtConfig[]): OxfmtConfig => {
   const config: OxfmtConfig = {};
   const ignorePatterns = new Set<string>();
   const overrides: OxfmtOverrideConfig[] = [];
@@ -17,10 +14,7 @@ export const oxfmtConfig = (
     }
     overrides.push(...(current.overrides ?? []));
 
-    if (
-      typeof current.sortImports === `object` &&
-      current.sortImports !== null
-    ) {
+    if (typeof current.sortImports === `object` && current.sortImports !== null) {
       sortImports = {
         ...(typeof sortImports === `object` ? sortImports : {}),
         ...current.sortImports,
@@ -29,10 +23,7 @@ export const oxfmtConfig = (
       sortImports = current.sortImports;
     }
 
-    if (
-      typeof current.sortTailwindcss === `object` &&
-      current.sortTailwindcss !== null
-    ) {
+    if (typeof current.sortTailwindcss === `object` && current.sortTailwindcss !== null) {
       sortTailwindcss = {
         ...(typeof sortTailwindcss === `object` ? sortTailwindcss : {}),
         ...current.sortTailwindcss,

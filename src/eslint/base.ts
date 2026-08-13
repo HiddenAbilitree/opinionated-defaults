@@ -14,14 +14,7 @@ const config: ConfigArray = [
     ignores: [`**/dist/`, `**/node_modules/`, `**/.git/`, `**/*.gen.ts`],
   },
   {
-    files: [
-      `**/*.ts`,
-      `**/*.js`,
-      `**/*.mjs`,
-      `**/*.mts`,
-      `**/*.tsx`,
-      `**/*.jsx`,
-    ],
+    files: [`**/*.ts`, `**/*.js`, `**/*.mjs`, `**/*.mts`, `**/*.tsx`, `**/*.jsx`],
   },
   ...tseslint.configs.recommendedTypeChecked,
   js.configs.recommended,
@@ -91,10 +84,7 @@ const config: ConfigArray = [
       'prefer-arrow-functions': preferArrowFunctions,
     },
     rules: {
-      'prefer-arrow-functions/prefer-arrow-functions': [
-        `error`,
-        { returnStyle: `implicit` },
-      ],
+      'prefer-arrow-functions/prefer-arrow-functions': [`error`, { returnStyle: `implicit` }],
     },
   },
 ];

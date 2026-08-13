@@ -1,6 +1,5 @@
-import type { ConfigArray } from 'typescript-eslint';
-
 import functional from 'eslint-plugin-functional';
+import type { ConfigArray } from 'typescript-eslint';
 
 const functionalConfig: ConfigArray = [
   functional.configs.externalTypeScriptRecommended,

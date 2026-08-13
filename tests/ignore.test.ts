@@ -1,6 +1,7 @@
 import { expect, test } from 'bun:test';
-import { ESLint } from 'eslint';
 import { fileURLToPath } from 'node:url';
+
+import { ESLint } from 'eslint';
 import { getFileInfo } from 'prettier';
 
 import eslintConfigBase from '../src/eslint/base';
@@ -12,15 +13,12 @@ const GENERATED_TS_PATTERN = `**/*.gen.ts`;
 test(`eslint base ignores generated TypeScript files`, async () => {
   expect(
     eslintConfigBase.some(
-      (config) =>
-        `ignores` in config && config.ignores?.includes(GENERATED_TS_PATTERN),
+      (config) => `ignores` in config && config.ignores?.includes(GENERATED_TS_PATTERN),
     ),
   ).toBe(true);
 
   const eslint = new ESLint({
-    overrideConfigFile: fileURLToPath(
-      new URL(`lint/eslint.config.ts`, import.meta.url),
-    ),
+    overrideConfigFile: fileURLToPath(new URL(`lint/eslint.config.ts`, import.meta.url)),
   });
 
   const isIgnored = await eslint.isPathIgnored(

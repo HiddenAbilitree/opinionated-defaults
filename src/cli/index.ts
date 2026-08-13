@@ -15,14 +15,10 @@ const getExePath = () => {
 
   try {
     return fileURLToPath(
-      import.meta.resolve(
-        `@hiddenability/opinionated-defaults-${os}-${arch}/bin/bin${extension}`,
-      ),
+      import.meta.resolve(`@hiddenability/opinionated-defaults-${os}-${arch}/bin/bin${extension}`),
     );
   } catch {
-    throw new Error(
-      `Couldn't find application binary inside node_modules for ${os}-${arch}`,
-    );
+    throw new Error(`Couldn't find application binary inside node_modules for ${os}-${arch}`);
   }
 };
 

@@ -8,13 +8,12 @@ type DefaultProjectOptions = {
 const eslintConfigDefaultProject = (
   filesOrOptions: DefaultProjectOptions | string[],
 ): ConfigArray => {
-  const options: DefaultProjectOptions =
-    Array.isArray(filesOrOptions) ?
-      { allowDefaultProject: filesOrOptions }
+  const options: DefaultProjectOptions = Array.isArray(filesOrOptions)
+    ? { allowDefaultProject: filesOrOptions }
     : filesOrOptions;
 
-  return options.allowDefaultProject.length === 0 ?
-      []
+  return options.allowDefaultProject.length === 0
+    ? []
     : [
         {
           languageOptions: {
