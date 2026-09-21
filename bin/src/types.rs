@@ -7,12 +7,6 @@ use {
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Tooling {
-  Eslint,
-  Ox,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PackageManager {
   Bun,
   BunOld,
@@ -27,7 +21,7 @@ pub struct ProjectData {
   pub manager: PackageManager,
 }
 
-include!(concat!(env!("OUT_DIR"), "/eslint_prettier_dependencies.rs"));
+include!(concat!(env!("OUT_DIR"), "/dependencies.rs"));
 
 impl PackageManager {
   pub const ALL: [Self; 6] = [
@@ -101,28 +95,19 @@ impl PackageManager {
     }
   }
 
-  pub fn command(self, tooling: Tooling) -> Command {
+  pub fn command(self, solid: bool) -> Command {
     let mut cmd = Command::new(self.cli());
 
     if self == Self::Deno {
-      cmd.arg("add");
-      match tooling {
-        Tooling::Eslint => {
-          cmd
-            .arg("npm:@hiddenability/opinionated-defaults@latest")
-            .arg("npm:@types/node");
-          for dependency in ESLINT_PRETTIER_DEPENDENCIES {
-            cmd.arg(format!("npm:{dependency}"));
-          }
-        }
-        Tooling::Ox => {
-          cmd
-            .arg("npm:@hiddenability/opinionated-defaults@latest")
-            .arg("npm:oxlint")
-            .arg("npm:oxlint-tsgolint")
-            .arg("npm:oxfmt")
-            .arg("npm:@types/node");
-        }
+      cmd
+        .arg("add")
+        .arg("npm:@hiddenability/opinionated-defaults@latest");
+      for dependency in OX_DEPENDENCIES {
+        cmd.arg(format!("npm:{dependency}"));
+      }
+      cmd.arg("npm:oxlint-tsgolint").arg("npm:@types/node");
+      if solid {
+        cmd.arg(format!("npm:{SOLID_PLUGIN_DEPENDENCY}"));
       }
       return cmd;
     }
@@ -133,21 +118,13 @@ impl PackageManager {
       _ => ("add", "-D"),
     };
 
-    cmd.arg(subcmd);
-    match tooling {
-      Tooling::Eslint => {
-        cmd.arg("@hiddenability/opinionated-defaults@latest");
-        for dependency in ESLINT_PRETTIER_DEPENDENCIES {
-          cmd.arg(*dependency);
-        }
-      }
-      Tooling::Ox => {
-        cmd
-          .arg("@hiddenability/opinionated-defaults@latest")
-          .arg("oxlint")
-          .arg("oxlint-tsgolint")
-          .arg("oxfmt");
-      }
+    cmd
+      .arg(subcmd)
+      .arg("@hiddenability/opinionated-defaults@latest")
+      .args(OX_DEPENDENCIES)
+      .arg("oxlint-tsgolint");
+    if solid {
+      cmd.arg(SOLID_PLUGIN_DEPENDENCY);
     }
     cmd.arg("@types/node").arg(dev_flag);
 
@@ -163,6 +140,12 @@ impl PackageManager {
 /// `serde_json` map type `pub struct Map<K, V>`
 /// represents a JSON key/value type
 pub type Packages = Map<String, Value>;
+
+pub fn has_solid(packages: &Packages) -> bool {
+  packages.contains_key("solid-js")
+    || packages.contains_key("@solidjs/start")
+    || packages.contains_key("@tanstack/solid-start")
+}
 
 #[derive(Deserialize)]
 pub struct JSONLockfile {
@@ -207,75 +190,42 @@ impl PackageJSON {
   }
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TSConfig {
-  pub compiler_options: Option<CompilerOptions>,
-  pub include: Option<Vec<String>>,
-  pub files: Option<Vec<String>>,
-  pub references: Option<Value>,
-}
-
-impl TSConfig {
-  pub fn is_solution_style(&self) -> bool {
-    self.references.is_some()
-      && (self.compiler_options.is_none() || self.files.as_ref().is_some_and(Vec::is_empty))
-  }
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CompilerOptions {
-  pub paths: Option<Map<String, Value>>,
-  #[serde(default)]
-  pub allow_js: bool,
-}
-
-pub struct Dependencies {
-  pub packages: Map<String, Value>,
-  pub valid_deps: Vec<(String, String)>,
-  pub default_deps: Vec<String>,
-}
-
 #[cfg(test)]
 mod tests {
   use super::*;
 
-  fn args(manager: PackageManager, tooling: Tooling) -> Vec<String> {
+  fn args(manager: PackageManager) -> Vec<String> {
     manager
-      .command(tooling)
+      .command(false)
       .get_args()
       .map(|arg| arg.to_string_lossy().into_owned())
       .collect()
   }
 
   #[test]
-  fn oxlint_install_includes_config_package_without_eslint_dependencies() {
-    let args = args(PackageManager::Npm, Tooling::Ox);
+  fn oxlint_installs_only_the_requested_solid_plugin() {
+    for manager in PackageManager::ALL {
+      let plugin = if manager == PackageManager::Deno {
+        format!("npm:{SOLID_PLUGIN_DEPENDENCY}")
+      } else {
+        SOLID_PLUGIN_DEPENDENCY.to_string()
+      };
+      let with_solid: Vec<_> = manager
+        .command(true)
+        .get_args()
+        .map(|arg| arg.to_string_lossy().into_owned())
+        .collect();
+      let without_solid = args(manager);
 
-    assert!(
-      args
-        .iter()
-        .any(|arg| arg == "@hiddenability/opinionated-defaults@latest")
-    );
-    for dependency in ESLINT_PRETTIER_DEPENDENCIES {
-      assert!(!args.iter().any(|arg| arg == dependency));
+      assert!(!without_solid.iter().any(|arg| arg == &plugin));
+      assert_eq!(with_solid.iter().filter(|arg| *arg == &plugin).count(), 1);
+      assert_eq!(
+        with_solid
+          .into_iter()
+          .filter(|arg| arg != &plugin)
+          .collect::<Vec<_>>(),
+        without_solid
+      );
     }
-  }
-
-  #[test]
-  fn eslint_install_includes_optional_dependencies() {
-    let args = args(PackageManager::Npm, Tooling::Eslint);
-
-    assert!(
-      args
-        .iter()
-        .any(|arg| arg == "@hiddenability/opinionated-defaults@latest")
-    );
-    for dependency in ESLINT_PRETTIER_DEPENDENCIES {
-      assert!(args.iter().any(|arg| arg == dependency));
-    }
-    assert!(!args.iter().any(|arg| arg.starts_with("oxfmt@")));
-    assert!(!args.iter().any(|arg| arg.starts_with("oxlint@")));
   }
 }

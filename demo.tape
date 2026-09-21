@@ -101,14 +101,14 @@ Type "clear" Sleep 750ms Enter
 
 Sleep 500ms
 
-Type "bat eslint.config.ts" Sleep 500ms Enter
+Type "bat oxlint.config.ts" Sleep 500ms Enter
 Sleep 2s 
 Type "j" Sleep 500ms 
 Type "j" Sleep 2s
 Type "q" Sleep 500ms
 
-Type "bat prettier.config.mjs" Sleep 500ms Enter
+Type "bat oxfmt.config.ts" Sleep 500ms Enter
 Sleep 3s
 
 Hide 
-Type "rm eslint.config.ts prettier.config.mjs prerun.log postrun.log" Enter
+Type "rm oxlint.config.ts oxfmt.config.ts prerun.log postrun.log" Enter

@@ -1,5 +1,5 @@
 use {
-  crate::types::{PackageJSON, Packages},
+  crate::types::{PackageJSON, Packages, has_solid},
   anyhow::{Context, Result},
   ignore::{WalkBuilder, overrides::OverrideBuilder},
   serde::Deserialize,
@@ -22,6 +22,7 @@ pub struct WorkspaceProject {
 enum OxlintConfig {
   React,
   Next,
+  Solid,
 }
 
 impl OxlintConfig {
@@ -29,6 +30,7 @@ impl OxlintConfig {
     match self {
       Self::Next => "oxlintConfigNext",
       Self::React => "oxlintConfigReact",
+      Self::Solid => "oxlintConfigSolid",
     }
   }
 }
@@ -78,6 +80,10 @@ const CHILD_OX_CONFIG_FILENAMES: &[&str] = &["oxlint.config.ts", "oxfmt.config.t
 const NO_OXLINT_CONFIGS: &[OxlintConfig] = &[];
 const NEXT_OXLINT_CONFIGS: &[OxlintConfig] = &[OxlintConfig::React, OxlintConfig::Next];
 const REACT_OXLINT_CONFIGS: &[OxlintConfig] = &[OxlintConfig::React];
+const SOLID_OXLINT_CONFIGS: &[OxlintConfig] = &[OxlintConfig::Solid];
+const REACT_SOLID_OXLINT_CONFIGS: &[OxlintConfig] = &[OxlintConfig::React, OxlintConfig::Solid];
+const NEXT_SOLID_OXLINT_CONFIGS: &[OxlintConfig] =
+  &[OxlintConfig::React, OxlintConfig::Next, OxlintConfig::Solid];
 
 fn read_workspace_patterns(root: &Path) -> Result<Vec<String>> {
   let package_json_path = root.join("package.json");
@@ -128,12 +134,17 @@ fn workspace_package_glob(pattern: &str) -> Option<String> {
 }
 
 fn oxlint_configs(packages: &Packages) -> &'static [OxlintConfig] {
-  if packages.contains_key("next") {
-    NEXT_OXLINT_CONFIGS
-  } else if packages.contains_key("react") || packages.contains_key("@tanstack/react-start") {
-    REACT_OXLINT_CONFIGS
-  } else {
-    NO_OXLINT_CONFIGS
+  match (
+    packages.contains_key("next"),
+    packages.contains_key("react") || packages.contains_key("@tanstack/react-start"),
+    has_solid(packages),
+  ) {
+    (true, _, true) => NEXT_SOLID_OXLINT_CONFIGS,
+    (true, _, false) => NEXT_OXLINT_CONFIGS,
+    (false, true, true) => REACT_SOLID_OXLINT_CONFIGS,
+    (false, true, false) => REACT_OXLINT_CONFIGS,
+    (false, false, true) => SOLID_OXLINT_CONFIGS,
+    (false, false, false) => NO_OXLINT_CONFIGS,
   }
 }
 
@@ -289,6 +300,15 @@ pub fn find_workspace_projects(root: &Path) -> Result<Vec<WorkspaceProject>> {
 
   projects.sort_by(|left, right| left.path.cmp(&right.path));
   Ok(projects)
+}
+
+pub fn needs_solid_plugin(root: &Path, packages: &Packages) -> Result<bool> {
+  Ok(
+    has_solid(packages)
+      || find_workspace_projects(root)?
+        .iter()
+        .any(|project| has_solid(&project.packages)),
+  )
 }
 
 pub fn build_oxlint_config(packages: &Packages, projects: &[WorkspaceProject]) -> String {
@@ -482,6 +502,124 @@ mod tests {
       path: PathBuf::from(path),
       packages: packages(package_names),
     }
+  }
+
+  #[test]
+  fn selects_solid_for_each_supported_framework_dependency() {
+    for dependency in ["solid-js", "@solidjs/start", "@tanstack/solid-start"] {
+      let config = build_oxlint_config(&packages(&[dependency]), &[]);
+
+      assert!(config.contains("  oxlintConfigSolid,"));
+      assert!(config.contains("    oxlintConfigBase,\n    oxlintConfigSolid,\n  ],"));
+      assert!(!config.contains("oxlintConfigReact"));
+      assert!(!config.contains("overrides:"));
+    }
+  }
+
+  #[test]
+  fn retains_react_and_next_when_solid_is_also_installed() {
+    assert_eq!(
+      oxlint_configs(&packages(&["react", "solid-js"])),
+      [OxlintConfig::React, OxlintConfig::Solid]
+    );
+    assert_eq!(
+      oxlint_configs(&packages(&["next", "@solidjs/start"])),
+      [OxlintConfig::React, OxlintConfig::Next, OxlintConfig::Solid]
+    );
+    assert_eq!(
+      oxlint_configs(&packages(&[
+        "@tanstack/react-start",
+        "@tanstack/solid-start"
+      ])),
+      [OxlintConfig::React, OxlintConfig::Solid]
+    );
+  }
+
+  #[test]
+  fn scopes_solid_and_react_to_their_matching_workspace_projects() {
+    let projects = [
+      project("apps/api", &["elysia"]),
+      project("apps/react", &["react"]),
+      project("apps/next", &["next"]),
+      project("apps/solid", &["solid-js"]),
+      project("apps/mixed", &["react", "solid-js"]),
+    ];
+    let common = common_oxlint_configs(&packages(&["turbo"]), &projects);
+
+    assert!(common.is_empty());
+    assert_eq!(
+      oxlint_override_groups(&common, &projects),
+      [
+        OxlintOverrideGroup {
+          configs: vec![OxlintConfig::React],
+          files: vec![
+            "apps/mixed/**/*".into(),
+            "apps/next/**/*".into(),
+            "apps/react/**/*".into(),
+          ],
+        },
+        OxlintOverrideGroup {
+          configs: vec![OxlintConfig::Next],
+          files: vec!["apps/next/**/*".into()],
+        },
+        OxlintOverrideGroup {
+          configs: vec![OxlintConfig::Solid],
+          files: vec!["apps/mixed/**/*".into()],
+        },
+        OxlintOverrideGroup {
+          configs: vec![OxlintConfig::Solid],
+          files: vec!["apps/solid/**/*".into()],
+        },
+      ]
+    );
+  }
+
+  #[test]
+  fn promotes_solid_only_when_every_workspace_project_uses_it() {
+    let projects = [
+      project("apps/solid", &["solid-js"]),
+      project("apps/start", &["@solidjs/start"]),
+      project("apps/tanstack", &["@tanstack/solid-start"]),
+    ];
+    let common = common_oxlint_configs(&packages(&["turbo"]), &projects);
+
+    assert_eq!(common, [OxlintConfig::Solid]);
+    assert!(oxlint_override_groups(&common, &projects).is_empty());
+  }
+
+  #[test]
+  fn requires_solid_plugin_for_declared_projects_but_not_unrelated_manifests() {
+    let workspace = TempWorkspace::new();
+    for directory in ["apps/web", "examples/demo"] {
+      create_dir_all(workspace.0.join(directory)).unwrap();
+    }
+    write(
+      workspace.0.join("package.json"),
+      r#"{"workspaces":["apps/*"]}"#,
+    )
+    .unwrap();
+    write(
+      workspace.0.join("apps/web/package.json"),
+      r#"{"dependencies":{"react":"latest"}}"#,
+    )
+    .unwrap();
+    write(
+      workspace.0.join("examples/demo/package.json"),
+      r#"{"dependencies":{"solid-js":"latest"}}"#,
+    )
+    .unwrap();
+    let root_packages = packages(&["turbo"]);
+
+    assert!(!needs_solid_plugin(&workspace.0, &root_packages).unwrap());
+    assert!(needs_solid_plugin(&workspace.0, &packages(&["solid-js"])).unwrap());
+
+    write(
+      workspace.0.join("apps/web/package.json"),
+      r#"{"peerDependencies":{"@tanstack/solid-start":"latest"}}"#,
+    )
+    .unwrap();
+
+    assert!(needs_solid_plugin(&workspace.0, &root_packages).unwrap());
   }
 
   #[test]

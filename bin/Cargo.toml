@@ -12,15 +12,10 @@ panic = "abort"
 
 [dependencies]
 serde_json = { version = "1.0.141", features = ["preserve_order"] }
-grep = "0.3.2"
-walkdir = "2.5.0"
 anyhow = "1.0.98"
 ignore = "0.4.23"
-regex = "1.11.1"
 log = "0.4.27"
 env_logger = "0.11.8"
-pathdiff = "0.2.3"
-dialoguer = "0.11"
 serde_yaml = "0.9.34"
 
 [dependencies.serde]

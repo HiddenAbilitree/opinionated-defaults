@@ -111,6 +111,7 @@ const mergeOxlintConfig = (config: OxlintConfig, source: OxlintConfig): OxlintCo
   env: mergeObjects(config.env, source.env),
   globals: mergeObjects(config.globals, source.globals),
   ignorePatterns: mergeUniqueArrays(config.ignorePatterns, source.ignorePatterns),
+  jsPlugins: mergeUniqueArrays(config.jsPlugins ?? undefined, source.jsPlugins ?? undefined),
   options: mergeObjects(config.options, source.options),
   overrides: mergeArrays(config.overrides, source.overrides),
   plugins: mergeUniqueArrays(config.plugins, source.plugins),

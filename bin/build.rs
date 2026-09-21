@@ -1,6 +1,6 @@
 use std::{
-  collections::BTreeMap,
   env::var,
+  fmt::Write as _,
   fs::{read_to_string, write},
   path::PathBuf,
 };
@@ -11,10 +11,10 @@ fn main() {
   let out_dir = var("OUT_DIR").unwrap();
   let manifest_dir = var("CARGO_MANIFEST_DIR").unwrap();
 
-  generate_eslint_prettier_dependencies(&manifest_dir, &out_dir);
+  generate_dependencies(&manifest_dir, &out_dir);
 }
 
-fn generate_eslint_prettier_dependencies(manifest_dir: &str, out_dir: &str) {
+fn generate_dependencies(manifest_dir: &str, out_dir: &str) {
   let package_paths = [
     PathBuf::from(manifest_dir).join("../package.json"),
     PathBuf::from(manifest_dir).join("src/package.json"),
@@ -40,30 +40,28 @@ fn generate_eslint_prettier_dependencies(manifest_dir: &str, out_dir: &str) {
     .and_then(Value::as_object)
     .unwrap_or_else(|| panic!("peerDependencies missing from {}", package_path.display()));
 
-  let dependencies = dependencies
-    .iter()
-    .filter(|(name, _)| !matches!(name.as_str(), "oxfmt" | "oxlint"))
-    .map(|(name, version)| {
-      let version = version
-        .as_str()
-        .unwrap_or_else(|| panic!("peer dependency {name} must have a string version"));
+  let dependency = |name: &str| {
+    let version = dependencies
+      .get(name)
+      .and_then(Value::as_str)
+      .unwrap_or_else(|| panic!("peer dependency {name} must have a string version"));
+    serde_json::to_string(&format!("{name}@{version}"))
+      .unwrap_or_else(|error| panic!("could not encode dependency {name}: {error}"))
+  };
 
-      (name, format!("{name}@{version}"))
-    })
-    .collect::<BTreeMap<_, _>>();
-
-  let mut generated = String::from("const ESLINT_PRETTIER_DEPENDENCIES: &[&str] = &[\n");
-  for dependency in dependencies.values() {
-    generated.push_str("  ");
-    generated.push_str(
-      &serde_json::to_string(dependency)
-        .unwrap_or_else(|error| panic!("could not encode dependency {dependency}: {error}")),
-    );
-    generated.push_str(",\n");
+  let mut generated = String::from("const OX_DEPENDENCIES: &[&str] = &[\n");
+  for name in ["oxlint", "oxfmt"] {
+    writeln!(generated, "  {},", dependency(name)).unwrap();
   }
   generated.push_str("];\n");
+  writeln!(
+    generated,
+    "const SOLID_PLUGIN_DEPENDENCY: &str = {};",
+    dependency("eslint-plugin-solid")
+  )
+  .unwrap();
 
-  let output_path = PathBuf::from(out_dir).join("eslint_prettier_dependencies.rs");
+  let output_path = PathBuf::from(out_dir).join("dependencies.rs");
   write(&output_path, generated)
     .unwrap_or_else(|error| panic!("could not write {}: {error}", output_path.display()));
 

@@ -7,7 +7,7 @@ use {
   std::fs::read_to_string,
 };
 
-fn read_package_json_packages() -> Option<Packages> {
+pub fn read_package_json_packages() -> Option<Packages> {
   let path = find_file("package.json")?;
   let content = read_to_string(&path).ok()?;
   let data: PackageJSON = serde_json::from_str(&content).ok()?;

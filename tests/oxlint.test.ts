@@ -7,6 +7,7 @@ import {
   oxlintConfigBase,
   oxlintConfigNext,
   oxlintConfigReact,
+  oxlintConfigSolid,
   oxlintConfigTanstackStart,
   oxlintIgnorePatterns,
   oxlintOverride,
@@ -53,6 +54,19 @@ test(`later configs win duplicate keys while list values deduplicate`, () => {
   expect(config.rules?.eqeqeq).toBe(`error`);
   expect(config.plugins?.filter((plugin) => plugin === `react`)).toHaveLength(1);
   expect(config.plugins).toEqual([`react`, `nextjs`]);
+});
+
+test(`JavaScript plugins survive composition with later framework configs`, () => {
+  const config = oxlintConfig([
+    oxlintConfigSolid,
+    { jsPlugins: [`eslint-plugin-example`] },
+    oxlintConfigSolid,
+    oxlintConfigReact,
+  ]);
+  const override = oxlintOverride([`apps/solid/**/*`], [oxlintConfigSolid, { jsPlugins: [] }]);
+
+  expect(config.jsPlugins).toEqual([`eslint-plugin-solid`, `eslint-plugin-example`]);
+  expect(override.jsPlugins).toEqual([`eslint-plugin-solid`]);
 });
 
 test(`later rule options extend earlier rule options`, () => {

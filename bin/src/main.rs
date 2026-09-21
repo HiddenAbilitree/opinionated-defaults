@@ -1,6 +1,5 @@
 mod generate_config;
 mod get_package_manager;
-mod handle_dependencies;
 mod monorepo;
 mod types;
 mod utils;
@@ -8,11 +7,11 @@ mod utils;
 use {
   crate::{
     generate_config::generate_config,
-    get_package_manager::get_package_manager_data,
-    types::{PackageManager, Packages, ProjectData, Tooling},
+    get_package_manager::{get_package_manager_data, read_package_json_packages},
+    monorepo::needs_solid_plugin,
+    types::{PackageManager, ProjectData},
   },
   anyhow::Result,
-  dialoguer::{Select, theme::ColorfulTheme},
   log::warn,
   std::{env, time::Instant},
 };
@@ -20,63 +19,39 @@ use {
 fn default_project() -> ProjectData {
   warn!("Could not find an existing package manager, defaulting to bun...");
   ProjectData {
-    packages: Packages::new(),
+    packages: read_package_json_packages().unwrap_or_default(),
     manager: PackageManager::Bun,
   }
 }
 
-fn run_install(manager: PackageManager, tooling: Tooling) -> bool {
-  if manager.command(tooling).output().is_err() {
+fn run_install(manager: PackageManager, solid: bool) -> bool {
+  if manager.command(solid).output().is_err() {
     eprintln!("❌ Could not install dependencies with {}.", manager.cli());
     return false;
   }
   true
 }
 
-fn get_tooling() -> Result<Tooling> {
-  let args: Vec<String> = env::args().collect();
-
-  if args.iter().any(|a| a == "-ox") {
-    return Ok(Tooling::Ox);
-  }
-
-  if args.iter().any(|a| a == "-es") {
-    return Ok(Tooling::Eslint);
-  }
-
-  let options = &["ESLint + Prettier", "Oxlint + Oxfmt"];
-  let selection = Select::with_theme(&ColorfulTheme::default())
-    .with_prompt("Which tooling would you like to use?")
-    .items(options)
-    .default(0)
-    .interact()?;
-
-  Ok(match selection {
-    1 => Tooling::Ox,
-    _ => Tooling::Eslint,
-  })
-}
-
 fn main() -> Result<()> {
   env_logger::init();
 
-  let tooling = get_tooling()?;
   let start = Instant::now();
 
   let mut project = get_package_manager_data().unwrap_or_else(default_project);
+  let solid = needs_solid_plugin(&env::current_dir()?, &project.packages)?;
 
-  if !run_install(project.manager, tooling) {
+  if !run_install(project.manager, solid) {
     return Ok(());
   }
 
   if project.manager == PackageManager::BunOld {
-    if !run_install(project.manager, tooling) {
+    if !run_install(project.manager, solid) {
       return Ok(());
     }
     project = get_package_manager_data().unwrap_or_else(default_project);
   }
 
-  generate_config(project.packages, tooling, project.manager)?;
+  generate_config(&project.packages, project.manager)?;
 
   println!(
     "✅ Done in {:.2?} using {}",
